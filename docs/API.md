@@ -14,6 +14,15 @@ Authorization: Bearer <jwt-token>
 - **User operations**: Allowed for any authenticated user (`role: user` or `role: admin`).
 - **Administrative operations**: Restricted exclusively to users with `role: admin`.
 
+### `POST /api/auth/register`
+Creates a customer account.
+
+### `POST /api/auth/login`
+Authenticates a user and returns a signed JWT.
+
+### `GET /api/auth/me`
+Retrieves current profile of authenticated user.
+
 ---
 
 ## 2. Movie Catalog (`/api/movies`)
@@ -61,148 +70,107 @@ Retrieves a paginated list of active movies with optional search and filters.
 ### `GET /api/movies/:id`
 Retrieves single movie details.
 
-- **Access**: Public
-- **Response `200 OK`**: Single movie object.
-- **Response `400 Bad Request`**: Malformed ObjectId.
-- **Response `404 Not Found`**: Movie not found or inactive.
-
 ### `POST /api/movies`
-Creates a new movie release.
-
-- **Access**: Admin only
-- **Request Body**:
-```json
-{
-  "title": "Interstellar",
-  "description": "Explorers travel through a wormhole in space.",
-  "duration": 169,
-  "genres": ["Sci-Fi", "Adventure"],
-  "language": "English",
-  "releaseDate": "2014-11-07",
-  "rating": "PG-13",
-  "posterUrl": "https://..."
-}
-```
-- **Response `201 Created`**: Returns created movie.
+Creates a new movie release (Admin only).
 
 ### `PUT /api/movies/:id`
-Updates existing movie metadata.
-
-- **Access**: Admin only
-- **Response `200 OK`**: Returns updated movie.
+Updates existing movie metadata (Admin only).
 
 ### `DELETE /api/movies/:id`
-Soft-deactivates a movie (`isActive: false`).
-
-- **Access**: Admin only
-- **Response `200 OK`**: Deactivation confirmation.
+Soft-deactivates a movie (`isActive: false`) (Admin only).
 
 ---
 
 ## 3. Theatres & Screens (`/api/theatres`)
 
 ### `GET /api/theatres`
-Lists cinema venues.
-
-- **Access**: Public
-- **Query Parameters**:
-  - `city` (string): Filter venues by city (e.g. `New York`).
-  - `search` / `q` (string): Search venues by name.
-- **Response `200 OK`**: List of active venues.
+Lists cinema venues with optional `city` and `search` query.
 
 ### `GET /api/theatres/:id`
 Retrieves venue details by ID.
 
-- **Access**: Public
-
 ### `POST /api/theatres`
-Creates a new cinema venue.
-
-- **Access**: Admin only
-- **Request Body**:
-```json
-{
-  "name": "Grand IMAX Downtown",
-  "city": "New York",
-  "address": "100 Broadway, New York, NY 10005",
-  "phone": "+1-212-555-0199"
-}
-```
-- **Response `201 Created`**: Returns created theatre.
+Creates a new cinema venue (Admin only).
 
 ### `GET /api/theatres/:theatreId/screens`
 Retrieves all auditoriums (screens) belonging to a specific venue.
 
-- **Access**: Public
-- **Response `200 OK`**: List of screen objects with layout and capacities.
-
 ### `POST /api/theatres/:theatreId/screens`
-Creates an auditorium in a theatre.
-
-- **Access**: Admin only
-- **Request Body**:
-```json
-{
-  "screenNumber": 1,
-  "name": "Screen 1 - IMAX Laser",
-  "screenType": "IMAX",
-  "seatingCapacity": 50,
-  "seatLayout": [
-    { "row": "A", "number": 1, "tier": "vip" }
-  ]
-}
-```
-- **Response `201 Created`**: Returns created screen.
-- **Response `409 Conflict`**: If `screenNumber` already exists for this theatre.
+Creates an auditorium in a theatre. Enforces compound uniqueness `{ theatre, screenNumber }` (Admin only).
 
 ---
 
 ## 4. Showtimes & Scheduling (`/api/shows`)
 
 ### `GET /api/shows`
-Lists screenings.
-
-- **Access**: Public
-- **Query Parameters**:
-  - `movie` (ObjectId): Filter by movie ID.
-  - `theatre` (ObjectId): Filter by theatre ID.
-  - `screen` (ObjectId): Filter by screen ID.
-  - `city` (string): Filter shows by theatre city.
-  - `date` (string, YYYY-MM-DD): Filter shows on a specific calendar date.
-  - `includePast` (boolean): Include screenings that have already started (default: false).
-- **Response `200 OK`**: List of shows with populated movie, theatre, screen, and available seat counts.
+Lists screenings filtered by `movie`, `theatre`, `screen`, `city`, and `date`. Includes available seat summaries.
 
 ### `GET /api/shows/:id`
 Retrieves complete show details, including pricing tiers and dynamic seat inventory.
 
-- **Access**: Public
-- **Response `200 OK`**: Populated show with full `seats` inventory.
-
 ### `POST /api/shows`
-Schedules a new screening.
+Schedules a new screening with collision prevention (`409 Conflict` on overlap) and automatic seat inventory generation (Admin only).
 
-- **Access**: Admin only
+### `PATCH /api/shows/:id/cancel`
+Cancels a show (`status: 'cancelled'`) (Admin only).
+
+---
+
+## 5. Ticket Bookings (`/api/bookings`)
+
+### `POST /api/bookings`
+Reserves seats for a scheduled show.
+
+- **Access**: Authenticated users
 - **Request Body**:
 ```json
 {
-  "movie": "67be...",
-  "theatre": "67be...",
-  "screen": "67be...",
-  "startTime": "2026-11-01T18:00:00Z",
-  "endTime": "2026-11-01T21:00:00Z",
-  "pricing": [
-    { "tier": "standard", "price": 12 },
-    { "tier": "vip", "price": 20 }
-  ]
+  "showId": "67be8f2...",
+  "seatNumbers": ["A1", "A2"]
 }
 ```
-- **Schedule Overlap Rule**: Shows cannot overlap in time on the same screen (`existing.startTime < new.endTime && existing.endTime > new.startTime`).
-- **Seat Auto-generation**: Automatically creates `seats` inventory from the screen's layout mapped to tier prices.
-- **Response `201 Created`**: Created show document.
-- **Response `409 Conflict`**: Returned when schedule collision occurs on the same screen.
+- **Concurrency & Double-Booking Protection**:
+  Executes an atomic single-document conditional update on `Show`. If any requested seat is no longer `available` or has been reserved concurrently, returns `409 Conflict`.
+- **Authoritative Pricing**: Total price is computed strictly by summing current seat tier prices on the server.
+- **Response `201 Created`**:
+```json
+{
+  "success": true,
+  "message": "Tickets booked successfully",
+  "data": {
+    "_id": "67be9...",
+    "bookingReference": "IMV-M7B2X-4K9A",
+    "user": "67be8...",
+    "show": "67be8...",
+    "seats": [
+      { "seatNumber": "A1", "tier": "vip", "price": 25 },
+      { "seatNumber": "A2", "tier": "vip", "price": 25 }
+    ],
+    "totalAmount": 50,
+    "bookingStatus": "confirmed",
+    "paymentStatus": "unpaid",
+    "createdAt": "2026-10-28T00:00:00.000Z"
+  }
+}
+```
+- **Response `400 Bad Request`**: Validation failure (empty seat array, non-existent seat, past show).
+- **Response `409 Conflict`**: One or more seats are already booked.
 
-### `PATCH /api/shows/:id/cancel`
-Cancels a show (`status: 'cancelled'`).
+### `GET /api/bookings/my-bookings`
+Retrieves authenticated user's booking history with populated movie, theatre, and screen details.
 
-- **Access**: Admin only
-- **Response `200 OK`**: Cancelled show document.
+- **Access**: Authenticated users
+- **Response `200 OK`**: Array of bookings sorted newest first.
+
+### `GET /api/bookings/:id`
+Retrieves details of a single booking.
+
+- **Access**: Authenticated owner or administrator.
+- **Response `403 Forbidden`**: Returned if a user attempts to view another customer's booking.
+
+### `PATCH /api/bookings/:id/cancel`
+Cancels a booking and immediately releases the reserved seats in the show's inventory.
+
+- **Access**: Authenticated owner or administrator.
+- **Rules**: Cannot cancel already cancelled bookings or shows that have already begun.
+- **Response `200 OK`**: Updated booking document with `bookingStatus: 'cancelled'`.

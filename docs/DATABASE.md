@@ -2,105 +2,54 @@
 
 ## 1. Overview
 
-IMovies uses **MongoDB Community Server** (v8.0.x) with **Mongoose ODM** (v8.x) for data persistence. MongoDB provides schema flexibility, document referencing, and atomic document updates for users, cinema schedules, seat availability, and ticket reservations.
+IMovies uses **MongoDB Community Server** (v8.0.x) with **Mongoose ODM** (v8.x) for data persistence.
 
 ## 2. Environment & Connection Strategy
 
 - **Development URI**: `mongodb://127.0.0.1:27017/imovies` (bound to localhost only)
 - **Isolated Test Database**: `mongodb://127.0.0.1:27017/imovies_test` (used exclusively during automated test execution to guarantee zero data loss in the development database)
-- **Connection Lifecycle**: Managed via `server/src/config/db.js` with connection pooling, 5000ms server selection timeout, and graceful disconnects on `SIGINT` and `SIGTERM`.
+- **Connection Lifecycle**: Managed via `server/src/config/db.js` with connection pooling, 5000ms server selection timeout, and graceful disconnects.
 
-## 3. Data Models & Schemas
+## 3. Concurrency & Double-Booking Strategy
 
-### 3.1 User (`users`)
-Stores authenticated customer and administrator accounts.
-- `name` (String, required, 2-100 characters, trimmed)
-- `email` (String, required, unique, lowercase, trimmed, validated via RFC 5322 regex pattern, indexed)
-- `password` (String, required, min 8 characters, hashed with bcrypt 12 rounds, `select: false`)
-- `role` (String, enum: `['user', 'admin']`, default: `'user'`)
-- `isActive` (Boolean, default: `true`)
-- Timestamps (`createdAt`, `updatedAt`)
+### 3.1 Standalone Deployment Adaptation
+The local Windows MongoDB service operates in standalone mode (`not running with --replSet`), meaning multi-document transactions (`session.startTransaction()`) are not natively supported.
 
-### 3.2 Movie (`movies`)
-Catalogs cinematic releases and details.
-- `title` (String, required, trimmed, 1-200 characters, indexed)
-- `description` (String, required, trimmed, max 2000 characters)
-- `duration` (Number, required, min 1 minute)
-- `genres` (Array of Strings, non-empty, e.g. Action, Sci-Fi)
-- `language` (String, required, max 50 characters)
-- `releaseDate` (Date, required, indexed)
-- `posterUrl` (String, trimmed)
-- `rating` (String, enum: `['G', 'PG', 'PG-13', 'R', 'NC-17', 'U', 'UA', 'A']`, default: `'PG-13'`)
-- `isActive` (Boolean, default: `true`, indexed)
-- Compound Index: `{ title: 1, isActive: 1 }`, `{ releaseDate: 1 }`
-- Timestamps
+### 3.2 Atomic Conditional Inventory Updates
+To guarantee 100% protection against double-booking and race conditions without requiring replica set orchestration:
+1. `Show` stores a dynamic `seats` inventory array where each seat has `status: ['available', 'reserved', 'booked']`.
+2. Booking requests execute a single atomic `Show.findOneAndUpdate` conditional on:
+   - `_id: showId`
+   - `status: 'scheduled'`
+   - `seats: { $all: requestedSeats.map(s => ({ $elemMatch: { seatNumber: s, status: 'available' } })) }`
+3. Targeted seats are modified via MongoDB `arrayFilters: [{ 'elem.seatNumber': { $in: requestedSeats } }]`.
+4. Single-document writes are serialized by WiredTiger document locks. If two requests contend for the same seat, exactly one updates the document and the second receives `null`, returning `409 Conflict`.
+5. If creating the `Booking` record fails, an application-level rollback resets the seats to `available`.
+6. When a booking is cancelled via `PATCH /api/bookings/:id/cancel`, an atomic `updateOne` resets the seats back to `status: 'available'`.
 
-### 3.3 Theatre (`theatres`)
-Physical cinema venues.
-- `name` (String, required, 2-150 characters, trimmed)
-- `city` (String, required, trimmed, indexed)
-- `address` (String, required, max 500 characters)
-- `phone` (String, optional)
-- `isActive` (Boolean, default: `true`, indexed)
-- Compound Index: `{ city: 1, name: 1 }`
-- Timestamps
+## 4. Collections & Schemas
 
-### 3.4 Screen (`screens`)
-Auditoriums within a specific theatre.
-- `theatre` (ObjectId, ref: `Theatre`, required, indexed)
-- `screenNumber` (Number, required, min 1)
-- `name` (String, default: `Screen {number}`)
-- `screenType` (String, enum: `['2D', '3D', 'IMAX', '4DX', 'Dolby Cinema']`, default: `'2D'`)
-- `seatingCapacity` (Number, required, min 1)
-- `seatLayout` (Array of objects: `{ row: String, number: Number, tier: ['standard', 'premium', 'vip'] }`)
-- Compound Unique Index: `{ theatre: 1, screenNumber: 1 }`
-- Timestamps
+### 4.1 User (`users`)
+- `name`, `email` (unique, lowercase), `password` (bcrypt hashed), `role` (`user` | `admin`), `isActive`.
 
-### 3.5 Show (`shows`)
-Screenings combining movie, theatre, and screen with dynamic seat availability.
-- `movie` (ObjectId, ref: `Movie`, required, indexed)
-- `theatre` (ObjectId, ref: `Theatre`, required, indexed)
-- `screen` (ObjectId, ref: `Screen`, required, indexed)
-- `startTime` (Date, required, indexed)
-- `endTime` (Date, required, validated `endTime > startTime`)
-- `pricing` (Array of `{ tier: ['standard', 'premium', 'vip'], price: Number >= 0 }`)
-- `seats` (Array of `{ seatNumber: String, tier: String, price: Number >= 0, status: ['available', 'reserved', 'booked'], reservedBy: ref User, reservedAt: Date }`)
-- `status` (String, enum: `['scheduled', 'cancelled', 'completed']`, default: `'scheduled'`, indexed)
-- Compound Indexes: `{ theatre: 1, startTime: 1 }`, `{ movie: 1, startTime: 1 }`, `{ screen: 1, startTime: 1 }`
-- Timestamps
+### 4.2 Movie (`movies`)
+- `title`, `description`, `duration`, `genres`, `language`, `releaseDate`, `posterUrl`, `rating`, `isActive`.
 
-### 3.6 Booking (`bookings`)
-Customer reservations.
-- `bookingReference` (String, required, unique, indexed, uppercase)
-- `user` (ObjectId, ref: `User`, required, indexed)
-- `show` (ObjectId, ref: `Show`, required, indexed)
-- `seats` (Array of `{ seatNumber: String, tier: String, price: Number >= 0 }`, non-empty)
-- `totalAmount` (Number, required, min 0)
-- `bookingStatus` (String, enum: `['pending', 'confirmed', 'cancelled']`, default: `'pending'`, indexed)
-- `paymentStatus` (String, enum: `['unpaid', 'paid', 'refunded']`, default: `'unpaid'`, indexed)
-- Compound Index: `{ user: 1, createdAt: -1 }`
-- Timestamps
+### 4.3 Theatre (`theatres`)
+- `name`, `city`, `address`, `phone`, `isActive`.
 
-### 3.7 Payment (`payments`)
-Transaction records for ticket bookings.
-- `booking` (ObjectId, ref: `Booking`, required, indexed)
-- `user` (ObjectId, ref: `User`, required, indexed)
-- `amount` (Number, required, min 0)
-- `currency` (String, default: `'USD'`)
-- `paymentMethod` (String, enum: `['simulated_card', 'card', 'upi', 'netbanking']`, default: `'simulated_card'`)
-- `transactionId` (String, required, unique, indexed)
-- `status` (String, enum: `['pending', 'completed', 'failed', 'refunded']`, default: `'pending'`, indexed)
-- `gatewayResponse` (Mixed object for simulated or actual gateway metadata)
-- Compound Index: `{ user: 1, createdAt: -1 }`
-- Timestamps
+### 4.4 Screen (`screens`)
+- `theatre` (ref), `screenNumber`, `name`, `screenType`, `seatingCapacity`, `seatLayout`.
+- Compound unique index: `{ theatre: 1, screenNumber: 1 }`.
 
-### 3.8 Notification (`notifications`)
-User transactional alerts and updates.
-- `user` (ObjectId, ref: `User`, required, indexed)
-- `type` (String, enum: `['booking_confirmation', 'cancellation', 'reminder', 'system']`, required)
-- `title` (String, required, max 200 chars)
-- `message` (String, required, max 1000 chars)
-- `isRead` (Boolean, default: false, indexed)
-- `metadata` (Mixed object)
-- Compound Index: `{ user: 1, isRead: 1, createdAt: -1 }`
-- Timestamps
+### 4.5 Show (`shows`)
+- `movie` (ref), `theatre` (ref), `screen` (ref), `startTime`, `endTime`, `pricing` (tiers), `seats` (inventory array), `status` (`scheduled`, `cancelled`, `completed`).
+
+### 4.6 Booking (`bookings`)
+- `bookingReference` (unique uppercase, e.g. `IMV-...`), `user` (ref), `show` (ref), `seats` (array of seatNumber, tier, price), `totalAmount`, `bookingStatus` (`pending`, `confirmed`, `cancelled`), `paymentStatus` (`unpaid`, `paid`, `refunded`).
+
+### 4.7 Payment (`payments`)
+- Transaction records for bookings (`simulated_card`, etc.).
+
+### 4.8 Notification (`notifications`)
+- Alerts for booking confirmations and cancellations.

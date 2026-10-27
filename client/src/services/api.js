@@ -24,6 +24,7 @@ async function request(endpoint, options = {}) {
   return data;
 }
 
+// Movies
 export async function fetchMovies(params = {}) {
   const query = new URLSearchParams();
   if (params.page) query.set('page', params.page);
@@ -43,6 +44,7 @@ export async function fetchMovieById(id) {
   return request(`/movies/${id}`);
 }
 
+// Theatres
 export async function fetchTheatres(params = {}) {
   const query = new URLSearchParams();
   if (params.city) query.set('city', params.city);
@@ -52,6 +54,7 @@ export async function fetchTheatres(params = {}) {
   return request(`/theatres${qs ? `?${qs}` : ''}`);
 }
 
+// Shows
 export async function fetchShows(params = {}) {
   const query = new URLSearchParams();
   if (params.movie) query.set('movie', params.movie);
@@ -68,10 +71,66 @@ export async function fetchShowById(id) {
   return request(`/shows/${id}`);
 }
 
+// Authentication
+export async function registerUser({ name, email, password }) {
+  return request('/auth/register', {
+    method: 'POST',
+    body: JSON.stringify({ name, email, password }),
+  });
+}
+
+export async function loginUser({ email, password }) {
+  return request('/auth/login', {
+    method: 'POST',
+    body: JSON.stringify({ email, password }),
+  });
+}
+
+export async function fetchMe(token) {
+  return request('/auth/me', {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+}
+
+// Bookings
+export async function createBooking({ showId, seatNumbers }, token) {
+  return request('/bookings', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}` },
+    body: JSON.stringify({ showId, seatNumbers }),
+  });
+}
+
+export async function fetchMyBookings(token) {
+  return request('/bookings/my-bookings', {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+}
+
+export async function fetchBookingById(id, token) {
+  return request(`/bookings/${id}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+}
+
+export async function cancelBooking(id, token) {
+  return request(`/bookings/${id}/cancel`, {
+    method: 'PATCH',
+    headers: { Authorization: `Bearer ${token}` },
+  });
+}
+
 export default {
   fetchMovies,
   fetchMovieById,
   fetchTheatres,
   fetchShows,
   fetchShowById,
+  registerUser,
+  loginUser,
+  fetchMe,
+  createBooking,
+  fetchMyBookings,
+  fetchBookingById,
+  cancelBooking,
 };
