@@ -1,0 +1,8 @@
+export { User } from './user.model.js';
+export { Movie } from './movie.model.js';
+export { Theatre } from './theatre.model.js';
+export { Screen } from './screen.model.js';
+export { Show } from './show.model.js';
+export { Booking } from './booking.model.js';
+export { Payment } from './payment.model.js';
+export { Notification } from './notification.model.js';

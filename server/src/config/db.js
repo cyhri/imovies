@@ -1,8 +1,10 @@
-﻿import mongoose from 'mongoose';
+import mongoose from 'mongoose';
 import { env } from './env.js';
 
 export async function connectDB(customUri = null) {
-  const uri = customUri || env.MONGODB_URI;
+  // In test environment, default to isolated test database unless explicitly overridden
+  const defaultUri = env.NODE_ENV === 'test' ? env.MONGODB_TEST_URI : env.MONGODB_URI;
+  const uri = customUri || defaultUri;
 
   if (mongoose.connection.readyState === 1) {
     return mongoose.connection;
@@ -13,7 +15,7 @@ export async function connectDB(customUri = null) {
       serverSelectionTimeoutMS: 5000,
     });
     if (env.NODE_ENV !== 'test') {
-      console.log(`[Database] MongoDB connected successfully to database "${conn.connection.name}"`);
+      console.log(`[Database] MongoDB connected successfully to "${conn.connection.name}"`);
     }
     return conn;
   } catch (err) {

@@ -1,4 +1,4 @@
-﻿import dotenv from 'dotenv';
+import dotenv from 'dotenv';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -27,7 +27,19 @@ export function validateEnv(customEnv = process.env) {
     errors.push(`Invalid MONGODB_URI "${MONGODB_URI}". Must start with mongodb:// or mongodb+srv://`);
   }
 
+  const MONGODB_TEST_URI = customEnv.MONGODB_TEST_URI || 'mongodb://127.0.0.1:27017/imovies_test';
+  if (!/^mongodb(\+srv)?:\/\//.test(MONGODB_TEST_URI)) {
+    errors.push(`Invalid MONGODB_TEST_URI "${MONGODB_TEST_URI}". Must start with mongodb:// or mongodb+srv://`);
+  }
+
   const CORS_ORIGIN = customEnv.CORS_ORIGIN || 'http://localhost:5173';
+
+  const JWT_SECRET = customEnv.JWT_SECRET || 'imovies_development_super_secret_jwt_key_2026_secure';
+  if (!JWT_SECRET || (NODE_ENV === 'production' && JWT_SECRET.length < 32)) {
+    errors.push('JWT_SECRET must be at least 32 characters long in production.');
+  }
+
+  const JWT_EXPIRES_IN = customEnv.JWT_EXPIRES_IN || '7d';
 
   if (errors.length > 0) {
     throw new Error(`Environment validation failed:\n - ${errors.join('\n - ')}`);
@@ -37,7 +49,10 @@ export function validateEnv(customEnv = process.env) {
     NODE_ENV,
     PORT,
     MONGODB_URI,
+    MONGODB_TEST_URI,
     CORS_ORIGIN,
+    JWT_SECRET,
+    JWT_EXPIRES_IN,
   });
 }
 

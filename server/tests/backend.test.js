@@ -1,4 +1,4 @@
-﻿import { test, describe, before, after } from 'node:test';
+import { test, describe, before, after } from 'node:test';
 import assert from 'node:assert/strict';
 import request from 'supertest';
 import mongoose from 'mongoose';
@@ -77,7 +77,7 @@ describe('2. Error and 404 Routing', () => {
 describe('3. Database Connectivity and Health Endpoint', () => {
   before(async () => {
     // Ensure connected to local dev database before health check
-    await connectDB();
+    await connectDB(process.env.MONGODB_TEST_URI || 'mongodb://127.0.0.1:27017/imovies_test');
   });
 
   after(async () => {
@@ -89,7 +89,7 @@ describe('3. Database Connectivity and Health Endpoint', () => {
     assert.equal(res.status, 200);
     assert.equal(res.body.status, 'ok');
     assert.equal(res.body.database.status, 'connected');
-    assert.equal(res.body.database.name, 'imovies');
+    assert.ok(res.body.database.name.startsWith('imovies'));
     assert.ok(typeof res.body.uptime === 'number');
     assert.ok(res.body.timestamp);
     // Ensure no sensitive URI/credentials are exposed
@@ -107,6 +107,6 @@ describe('3. Database Connectivity and Health Endpoint', () => {
     assert.equal(res.body.database.status, 'disconnected');
 
     // Reconnect for subsequent tests
-    await connectDB();
+    await connectDB(process.env.MONGODB_TEST_URI || 'mongodb://127.0.0.1:27017/imovies_test');
   });
 });
