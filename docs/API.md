@@ -174,3 +174,78 @@ Cancels a booking and immediately releases the reserved seats in the show's inve
 - **Access**: Authenticated owner or administrator.
 - **Rules**: Cannot cancel already cancelled bookings or shows that have already begun.
 - **Response `200 OK`**: Updated booking document with `bookingStatus: 'cancelled'`.
+
+---
+
+## 6. Admin Dashboard & Operations (`/api/admin`)
+
+All administrative routes require a valid JWT with `role: admin`. Requests without a token receive `401 Unauthorized`; requests from users with `role: user` receive `403 Forbidden`.
+
+### `GET /api/admin/overview`
+Aggregates live platform-wide KPIs directly from MongoDB.
+
+- **Access**: Admin only (`authenticate` + `authorize('admin')`)
+- **Response `200 OK`**:
+```json
+{
+  "success": true,
+  "data": {
+    "totalMovies": 12,
+    "activeMovies": 9,
+    "totalTheatres": 4,
+    "totalScreens": 16,
+    "totalShows": 48,
+    "scheduledShows": 35,
+    "totalBookings": 120,
+    "confirmedBookings": 115,
+    "cancelledBookings": 5,
+    "totalRevenue": 2875
+  }
+}
+```
+
+### `GET /api/admin/bookings`
+Retrieves a paginated list of all customer bookings platform-wide, including customer details, movie titles, theatre locations, seat assignments, and simulation payment status.
+
+- **Access**: Admin only (`authenticate` + `authorize('admin')`)
+- **Query Parameters**:
+  - `page` (number, default: 1): Page index.
+  - `limit` (number, default: 20, max: 100): Results per page.
+  - `status` (string, optional): Filter by booking status (`confirmed`, `cancelled`).
+- **Response `200 OK`**:
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "_id": "67be9...",
+      "bookingReference": "IMV-M7B2X-4K9A",
+      "user": {
+        "_id": "67be8...",
+        "name": "Jane Doe",
+        "email": "jane@example.com"
+      },
+      "show": {
+        "_id": "67be8...",
+        "movie": { "title": "Inception" },
+        "theatre": { "name": "Grand Cinema", "city": "New York" },
+        "screen": { "name": "Screen 1" },
+        "startTime": "2026-11-01T18:00:00.000Z"
+      },
+      "seats": [
+        { "seatNumber": "A1", "tier": "vip", "price": 25 }
+      ],
+      "totalAmount": 25,
+      "bookingStatus": "confirmed",
+      "paymentStatus": "unpaid",
+      "createdAt": "2026-10-28T00:00:00.000Z"
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "limit": 20,
+    "total": 120,
+    "totalPages": 6
+  }
+}
+```

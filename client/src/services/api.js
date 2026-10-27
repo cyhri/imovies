@@ -35,6 +35,7 @@ export async function fetchMovies(params = {}) {
   if (params.language) query.set('language', params.language);
   if (params.sortBy) query.set('sortBy', params.sortBy);
   if (params.order) query.set('order', params.order);
+  if (params.all) query.set('all', params.all);
 
   const qs = query.toString();
   return request(`/movies${qs ? `?${qs}` : ''}`);
@@ -44,14 +45,85 @@ export async function fetchMovieById(id) {
   return request(`/movies/${id}`);
 }
 
+export async function createMovie(data, token) {
+  return request('/movies', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}` },
+    body: JSON.stringify(data),
+  });
+}
+
+export async function updateMovie(id, data, token) {
+  return request(`/movies/${id}`, {
+    method: 'PUT',
+    headers: { Authorization: `Bearer ${token}` },
+    body: JSON.stringify(data),
+  });
+}
+
+export async function deleteMovie(id, token) {
+  return request(`/movies/${id}`, {
+    method: 'DELETE',
+    headers: { Authorization: `Bearer ${token}` },
+  });
+}
+
 // Theatres
 export async function fetchTheatres(params = {}) {
   const query = new URLSearchParams();
   if (params.city) query.set('city', params.city);
   if (params.search) query.set('search', params.search);
+  if (params.all) query.set('all', params.all);
 
   const qs = query.toString();
   return request(`/theatres${qs ? `?${qs}` : ''}`);
+}
+
+export async function fetchTheatreById(id) {
+  return request(`/theatres/${id}`);
+}
+
+export async function createTheatre(data, token) {
+  return request('/theatres', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}` },
+    body: JSON.stringify(data),
+  });
+}
+
+export async function updateTheatre(id, data, token) {
+  return request(`/theatres/${id}`, {
+    method: 'PUT',
+    headers: { Authorization: `Bearer ${token}` },
+    body: JSON.stringify(data),
+  });
+}
+
+export async function deleteTheatre(id, token) {
+  return request(`/theatres/${id}`, {
+    method: 'DELETE',
+    headers: { Authorization: `Bearer ${token}` },
+  });
+}
+
+// Screens
+export async function fetchScreensByTheatre(theatreId) {
+  return request(`/theatres/${theatreId}/screens`);
+}
+
+export async function createScreen(theatreId, data, token) {
+  return request(`/theatres/${theatreId}/screens`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}` },
+    body: JSON.stringify(data),
+  });
+}
+
+export async function deleteScreen(screenId, token) {
+  return request(`/theatres/screens/${screenId}`, {
+    method: 'DELETE',
+    headers: { Authorization: `Bearer ${token}` },
+  });
 }
 
 // Shows
@@ -62,6 +134,8 @@ export async function fetchShows(params = {}) {
   if (params.screen) query.set('screen', params.screen);
   if (params.city) query.set('city', params.city);
   if (params.date) query.set('date', params.date);
+  if (params.includePast) query.set('includePast', params.includePast);
+  if (params.status) query.set('status', params.status);
 
   const qs = query.toString();
   return request(`/shows${qs ? `?${qs}` : ''}`);
@@ -69,6 +143,21 @@ export async function fetchShows(params = {}) {
 
 export async function fetchShowById(id) {
   return request(`/shows/${id}`);
+}
+
+export async function createShow(data, token) {
+  return request('/shows', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}` },
+    body: JSON.stringify(data),
+  });
+}
+
+export async function cancelShow(id, token) {
+  return request(`/shows/${id}/cancel`, {
+    method: 'PATCH',
+    headers: { Authorization: `Bearer ${token}` },
+  });
 }
 
 // Authentication
@@ -120,12 +209,44 @@ export async function cancelBooking(id, token) {
   });
 }
 
+// Admin Portal APIs
+export async function fetchAdminOverview(token) {
+  return request('/admin/overview', {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+}
+
+export async function fetchAdminBookings(params = {}, token) {
+  const query = new URLSearchParams();
+  if (params.page) query.set('page', params.page);
+  if (params.limit) query.set('limit', params.limit);
+  if (params.status) query.set('status', params.status);
+  if (params.search) query.set('search', params.search);
+
+  const qs = query.toString();
+  return request(`/admin/bookings${qs ? `?${qs}` : ''}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+}
+
 export default {
   fetchMovies,
   fetchMovieById,
+  createMovie,
+  updateMovie,
+  deleteMovie,
   fetchTheatres,
+  fetchTheatreById,
+  createTheatre,
+  updateTheatre,
+  deleteTheatre,
+  fetchScreensByTheatre,
+  createScreen,
+  deleteScreen,
   fetchShows,
   fetchShowById,
+  createShow,
+  cancelShow,
   registerUser,
   loginUser,
   fetchMe,
@@ -133,4 +254,6 @@ export default {
   fetchMyBookings,
   fetchBookingById,
   cancelBooking,
+  fetchAdminOverview,
+  fetchAdminBookings,
 };
