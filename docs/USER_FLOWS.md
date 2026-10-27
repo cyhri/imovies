@@ -4,12 +4,12 @@ This document details the primary customer and administrator workflows in the IM
 
 ---
 
-## 1. Customer Ticket Booking Journey
+## 1. Customer Ticket Booking Journey with Real-Time Holds
 
 ```
-[ Movie Catalog ] â”€â”€> [ View Showtimes ] â”€â”€> [ Seat Selection Map ] â”€â”€> [ Booking Review ] â”€â”€> [ Confirmed Booking ]
-                                                                                   â”‚
-                                                                                   â””â”€â”€> [ My Bookings / Cancel ]
+[ Movie Catalog ] â”€â”€> [ View Showtimes ] â”€â”€> [ Live Seat Map ] â”€â”€> [ Temporary 5-Min Hold ] â”€â”€> [ Booking Review ] â”€â”€> [ Confirmed Booking ]
+                                                    â”‚                         â”‚                                            â”‚
+                                           (Socket Sync)            (Hold Countdown)                         [ My Bookings / Cancel ]
 ```
 
 ### Step 1: Movie Discovery
@@ -22,33 +22,50 @@ This document details the primary customer and administrator workflows in the IM
 2. The user reviews venue names, screen formats (IMAX, Dolby Cinema, 2D), show dates, and start times.
 3. The user clicks **Choose Seats** on their preferred screening.
 
-### Step 3: Interactive Seat Selection
+### Step 3: Interactive Seat Selection & Real-Time Multiplayer Sync
 1. The 2D seating layout opens, oriented towards the curved **Cinema Screen** banner.
-2. The user distinguishes seats by category:
+2. A **Live Availability** badge indicates real-time Socket.IO synchronization:
+   - When other users hold, release, or book seats, availability updates instantly on screen without refreshing.
+   - If the WebSocket drops, the client automatically falls back to an 8-second polling interval.
+3. Seat Category & Status Identification:
    - **VIP** (Gold / Amber tier)
    - **Premium** (Purple tier)
    - **Standard** (Slate / Gray tier)
+   - **Held by You** (Glowing gold badge with active hold countdown)
+   - **Held by Another Customer** (Orange/amber badge, disabled)
    - **Booked** (Crossed-out, disabled)
-3. The user selects seats by clicking on them. Selected seats glow in vibrant red.
-4. The live selection tray displays selected seat labels and calculates the authoritative total price.
-5. The user clicks **Proceed to Review**.
+4. The user selects seats by clicking on available seats.
 
-### Step 4: Booking Review & Authentication
-1. If the user is unauthenticated, a quick modal prompts them to sign in or create an account.
-2. The review screen shows an itemized breakdown of tickets, venue, showtime, and authoritative total price.
+### Step 4: Temporary Seat Hold & Countdown
+1. When the user clicks **Hold Seats & Review**:
+   - If unauthenticated, a quick modal prompts them to sign in.
+   - The frontend calls `POST /api/shows/:id/holds`.
+   - The backend atomically reserves the seats for 5 minutes (`HOLD_DURATION_SECONDS`).
+   - The Socket.IO server broadcasts `seats:held` to all connected clients viewing the same show.
+2. An interactive **Hold Countdown Tray** appears with a ticking timer (`04:59`).
+3. The user has 5 minutes of guaranteed exclusivity to complete the checkout.
+4. If the user navigates away or closes the map, the hold is cleanly released via `DELETE /api/shows/:id/holds/:holdToken`.
+
+### Step 5: Booking Review & Confirmation
+1. The review screen shows an itemized breakdown of tickets, venue, showtime, and authoritative total price.
+2. A live timer banner reflects the active hold token and remaining checkout time.
 3. A clear simulation notice clarifies: *"Simulation Mode Notice: Tickets will be confirmed with paymentStatus: unpaid. No real card will be charged."*
 4. The user clicks **Confirm & Book Now**.
+5. The backend validates the hold token, transitions the seats to `booked`, marks the hold `completed`, and broadcasts `seats:booked`.
+6. On success, the **Booking Confirmed** view presents the unique booking reference (`IMV-XXXXX`), seat list, and status.
 
-### Step 5: Concurrency Safety & Confirmation
-1. The backend atomically locks and books the requested seats.
-2. If another user booked any of the selected seats simultaneously, a friendly conflict banner appears: *"One or more selected seats were just reserved by another customer. Please choose different seats."*
-3. On success, the **Booking Confirmed** view presents the unique booking reference (`IMV-XXXXX`), seat list, and status.
+### Step 6: Hold Expiration Handling
+1. If the 5-minute countdown expires before checkout:
+   - A friendly alert notifies the customer: *"Your seat hold has expired. The seats have been released."*
+   - The checkout modal automatically closes.
+   - The seat map refreshes to show current availability.
+   - Background worker and lazy expiration ensure the seats are immediately re-claimable by any customer.
 
-### Step 6: Booking Management & Cancellation
+### Step 7: Booking Management & Cancellation
 1. Users can open **My Bookings** at any time from the top navigation.
 2. Displays past and upcoming reservations with status badges.
 3. For eligible upcoming shows, the user can click **Cancel Booking**.
-4. The booking status transitions to `cancelled`, and the backend immediately releases the seats back to `available` status in the show's inventory.
+4. The booking status transitions to `cancelled`, the backend releases the seats, and Socket.IO broadcasts `seats:released` to all connected clients.
 
 ---
 

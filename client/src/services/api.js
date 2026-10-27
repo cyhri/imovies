@@ -182,11 +182,33 @@ export async function fetchMe(token) {
 }
 
 // Bookings
-export async function createBooking({ showId, seatNumbers }, token) {
+export async function createBooking({ showId, seatNumbers, holdToken }, token) {
   return request('/bookings', {
     method: 'POST',
     headers: { Authorization: `Bearer ${token}` },
-    body: JSON.stringify({ showId, seatNumbers }),
+    body: JSON.stringify({ showId, seatNumbers, holdToken }),
+  });
+}
+
+// Seat Holds
+export async function createSeatHold(showId, seatNumbers, token, durationSeconds = 300) {
+  return request(`/shows/${showId}/holds`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}` },
+    body: JSON.stringify({ seatNumbers, durationSeconds }),
+  });
+}
+
+export async function releaseSeatHold(showId, holdToken, token) {
+  return request(`/shows/${showId}/holds/${holdToken}`, {
+    method: 'DELETE',
+    headers: { Authorization: `Bearer ${token}` },
+  });
+}
+
+export async function fetchSeatHold(showId, holdToken, token) {
+  return request(`/shows/${showId}/holds/${holdToken}`, {
+    headers: { Authorization: `Bearer ${token}` },
   });
 }
 
@@ -254,6 +276,9 @@ export default {
   fetchMyBookings,
   fetchBookingById,
   cancelBooking,
+  createSeatHold,
+  releaseSeatHold,
+  fetchSeatHold,
   fetchAdminOverview,
   fetchAdminBookings,
 };

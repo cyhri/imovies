@@ -19,7 +19,9 @@
     "helmet": "^8.0.0",
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^8.10.1",
-    "morgan": "^1.10.0"
+    "morgan": "^1.10.0",
+    "socket.io": "^4.8.4",
+    "socket.io-client": "^4.8.4"
   },
   "devDependencies": {
     "supertest": "^7.0.0"

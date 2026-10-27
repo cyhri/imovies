@@ -1,6 +1,6 @@
-# IMovies â€” REST API Documentation
+# IMovies â€” REST & Real-Time API Documentation
 
-This document describes the REST API endpoints provided by the IMovies backend service under `/api`.
+This document describes the REST API endpoints and real-time Socket.IO events provided by the IMovies platform under `/api`.
 
 ---
 
@@ -40,32 +40,6 @@ Retrieves a paginated list of active movies with optional search and filters.
   - `language` (string): Filter by audio language.
   - `sortBy` (string, default: `releaseDate`): Field to sort by (`releaseDate`, `title`, `duration`).
   - `order` (string, default: `desc`): Sort direction (`asc`, `desc`).
-- **Response `200 OK`**:
-```json
-{
-  "success": true,
-  "data": [
-    {
-      "_id": "67be8...",
-      "title": "Inception",
-      "description": "A thief who steals corporate secrets...",
-      "duration": 148,
-      "genres": ["Action", "Sci-Fi"],
-      "language": "English",
-      "releaseDate": "2010-07-16T00:00:00.000Z",
-      "rating": "PG-13",
-      "posterUrl": "https://...",
-      "isActive": true
-    }
-  ],
-  "pagination": {
-    "page": 1,
-    "limit": 10,
-    "total": 1,
-    "totalPages": 1
-  }
-}
-```
 
 ### `GET /api/movies/:id`
 Retrieves single movie details.
@@ -107,6 +81,8 @@ Lists screenings filtered by `movie`, `theatre`, `screen`, `city`, and `date`. I
 
 ### `GET /api/shows/:id`
 Retrieves complete show details, including pricing tiers and dynamic seat inventory.
+- **Lazy Expiration**: Expired temporary seat holds (`holdExpiresAt <= now`) are automatically normalized to `status: 'available'` in the response payload.
+- **Ownership Flag**: Includes `isHeldByMe: true` if the seat is held by the currently authenticated requester.
 
 ### `POST /api/shows`
 Schedules a new screening with collision prevention (`409 Conflict` on overlap) and automatic seat inventory generation (Admin only).
@@ -116,22 +92,74 @@ Cancels a show (`status: 'cancelled'`) (Admin only).
 
 ---
 
-## 5. Ticket Bookings (`/api/bookings`)
+## 5. Temporary Seat Holds (`/api/shows/:id/holds`)
 
-### `POST /api/bookings`
-Reserves seats for a scheduled show.
+### `POST /api/shows/:id/holds`
+Places a temporary hold on one or more available seats for a scheduled show.
 
 - **Access**: Authenticated users
 - **Request Body**:
 ```json
 {
-  "showId": "67be8f2...",
-  "seatNumbers": ["A1", "A2"]
+  "seatNumbers": ["A1", "A2"],
+  "durationSeconds": 300
 }
 ```
-- **Concurrency & Double-Booking Protection**:
-  Executes an atomic single-document conditional update on `Show`. If any requested seat is no longer `available` or has been reserved concurrently, returns `409 Conflict`.
-- **Authoritative Pricing**: Total price is computed strictly by summing current seat tier prices on the server.
+- **Hold Duration**: Configurable via `HOLD_DURATION_SECONDS` environment variable (defaults to 300 seconds / 5 minutes). Minimum 5 seconds, maximum 1800 seconds (30 minutes).
+- **Concurrency & Double-Hold Prevention**: Executes an atomic single-document conditional update on `Show`. If any requested seat is currently booked or actively held by another user (`holdExpiresAt > now`), the transaction halts and returns `409 Conflict`.
+- **Response `201 Created`**:
+```json
+{
+  "success": true,
+  "message": "Seats held successfully",
+  "data": {
+    "holdToken": "HLD-MVR49S8S-AZY19",
+    "showId": "67be8...",
+    "seats": [
+      { "seatNumber": "A1", "tier": "vip", "price": 25 },
+      { "seatNumber": "A2", "tier": "vip", "price": 25 }
+    ],
+    "totalAmount": 50,
+    "expiresAt": "2026-10-28T01:45:00.000Z",
+    "expiresInSeconds": 300
+  }
+}
+```
+- **Response `409 Conflict`**: One or more selected seats are already booked or held by another customer.
+
+### `GET /api/shows/:id/holds/:holdToken`
+Retrieves the details and remaining time for an active seat hold.
+
+- **Access**: Hold owner or administrator.
+- **Response `200 OK`**: Hold details including `expiresInSeconds`.
+
+### `DELETE /api/shows/:id/holds/:holdToken`
+Releases an active seat hold immediately and restores the seats to `available` status in the show's inventory.
+
+- **Access**: Hold owner or administrator.
+- **Protection**: Rejects unauthorized attempts with `403 Forbidden`.
+- **Response `200 OK`**: `{ "success": true, "message": "Seat hold released successfully" }`.
+
+---
+
+## 6. Ticket Bookings (`/api/bookings`)
+
+### `POST /api/bookings`
+Confirms ticket reservations. Can convert a temporary seat hold into a confirmed booking or directly reserve available seats.
+
+- **Access**: Authenticated users
+- **Request Body with Hold Token**:
+```json
+{
+  "showId": "67be8f2...",
+  "seatNumbers": ["A1", "A2"],
+  "holdToken": "HLD-MVR49S8S-AZY19"
+}
+```
+- **Hold Owner Validation**: Only the authenticated user who created the hold may confirm it. Using another customer's hold returns `403 Forbidden`.
+- **Hold Expiration Enforcement**: If the hold expired (`expiresAt <= now`), returns `409 Conflict` requiring re-selection.
+- **Authoritative Pricing**: Total price is computed strictly by summing authoritative seat prices on the server.
+- **Atomic Transition**: Seats atomically transition from `status: 'reserved'` (with matching `holdToken`) to `status: 'booked'`. The `SeatHold` record transitions to `completed`.
 - **Response `201 Created`**:
 ```json
 {
@@ -153,99 +181,45 @@ Reserves seats for a scheduled show.
   }
 }
 ```
-- **Response `400 Bad Request`**: Validation failure (empty seat array, non-existent seat, past show).
-- **Response `409 Conflict`**: One or more seats are already booked.
 
 ### `GET /api/bookings/my-bookings`
 Retrieves authenticated user's booking history with populated movie, theatre, and screen details.
 
-- **Access**: Authenticated users
-- **Response `200 OK`**: Array of bookings sorted newest first.
-
 ### `GET /api/bookings/:id`
-Retrieves details of a single booking.
-
-- **Access**: Authenticated owner or administrator.
-- **Response `403 Forbidden`**: Returned if a user attempts to view another customer's booking.
+Retrieves details of a single booking (owner or admin only).
 
 ### `PATCH /api/bookings/:id/cancel`
-Cancels a booking and immediately releases the reserved seats in the show's inventory.
-
-- **Access**: Authenticated owner or administrator.
-- **Rules**: Cannot cancel already cancelled bookings or shows that have already begun.
-- **Response `200 OK`**: Updated booking document with `bookingStatus: 'cancelled'`.
+Cancels a booking, transitions status to `cancelled`, and immediately releases the reserved seats back to `available` status in the show's inventory.
 
 ---
 
-## 6. Admin Dashboard & Operations (`/api/admin`)
+## 7. Real-Time Socket.IO Synchronization
 
-All administrative routes require a valid JWT with `role: admin`. Requests without a token receive `401 Unauthorized`; requests from users with `role: user` receive `403 Forbidden`.
+Clients connect to the Socket.IO service at the server origin (`ws://` / `http://`).
+
+### Rooms & Scoping
+- **`join:show`**: Client emits `socket.emit('join:show', showId)` when opening the seat selection map.
+- **`leave:show`**: Client emits `socket.emit('leave:show', showId)` when navigating away from the seat map.
+
+### Real-Time Broadcast Events (Scoped to `show:${showId}`)
+
+| Event Name | Payload | Trigger |
+|:---|:---|:---|
+| `seats:held` | `{ showId, seatNumbers, holdExpiresAt, userId }` | A user acquires a temporary hold on seats |
+| `seats:released` | `{ showId, seatNumbers }` | A user releases their hold or cancels a booking |
+| `seats:expired` | `{ showId, seatNumbers }` | Background worker cleans up expired holds |
+| `seats:booked` | `{ showId, seatNumbers }` | A user confirms checkout and books seats |
+
+Clients reconcile incoming socket events with local UI state in real time without reloading the page. If the WebSocket connection disconnects, an automatic 8-second polling fallback keeps availability synchronized.
+
+---
+
+## 8. Admin Dashboard & Operations (`/api/admin`)
+
+Requires `role: admin`.
 
 ### `GET /api/admin/overview`
 Aggregates live platform-wide KPIs directly from MongoDB.
 
-- **Access**: Admin only (`authenticate` + `authorize('admin')`)
-- **Response `200 OK`**:
-```json
-{
-  "success": true,
-  "data": {
-    "totalMovies": 12,
-    "activeMovies": 9,
-    "totalTheatres": 4,
-    "totalScreens": 16,
-    "totalShows": 48,
-    "scheduledShows": 35,
-    "totalBookings": 120,
-    "confirmedBookings": 115,
-    "cancelledBookings": 5,
-    "totalRevenue": 2875
-  }
-}
-```
-
 ### `GET /api/admin/bookings`
-Retrieves a paginated list of all customer bookings platform-wide, including customer details, movie titles, theatre locations, seat assignments, and simulation payment status.
-
-- **Access**: Admin only (`authenticate` + `authorize('admin')`)
-- **Query Parameters**:
-  - `page` (number, default: 1): Page index.
-  - `limit` (number, default: 20, max: 100): Results per page.
-  - `status` (string, optional): Filter by booking status (`confirmed`, `cancelled`).
-- **Response `200 OK`**:
-```json
-{
-  "success": true,
-  "data": [
-    {
-      "_id": "67be9...",
-      "bookingReference": "IMV-M7B2X-4K9A",
-      "user": {
-        "_id": "67be8...",
-        "name": "Jane Doe",
-        "email": "jane@example.com"
-      },
-      "show": {
-        "_id": "67be8...",
-        "movie": { "title": "Inception" },
-        "theatre": { "name": "Grand Cinema", "city": "New York" },
-        "screen": { "name": "Screen 1" },
-        "startTime": "2026-11-01T18:00:00.000Z"
-      },
-      "seats": [
-        { "seatNumber": "A1", "tier": "vip", "price": 25 }
-      ],
-      "totalAmount": 25,
-      "bookingStatus": "confirmed",
-      "paymentStatus": "unpaid",
-      "createdAt": "2026-10-28T00:00:00.000Z"
-    }
-  ],
-  "pagination": {
-    "page": 1,
-    "limit": 20,
-    "total": 120,
-    "totalPages": 6
-  }
-}
-```
+Retrieves a paginated list of all customer bookings platform-wide.

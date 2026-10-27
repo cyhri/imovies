@@ -1,8 +1,11 @@
-﻿import app from './app.js';
+import http from 'node:http';
+import app from './app.js';
 import { env } from './config/env.js';
 import { connectDB, disconnectDB } from './config/db.js';
+import { initSocket, closeSocket } from './socket.js';
+import { startHoldCleanupWorker, stopHoldCleanupWorker } from './services/holdCleanup.service.js';
 
-let server;
+let httpServer;
 
 async function startServer() {
   try {
@@ -11,15 +14,22 @@ async function startServer() {
     console.error(`[Server] Warning: Server started but MongoDB connection failed: ${err.message}`);
   }
 
-  server = app.listen(env.PORT, () => {
+  httpServer = http.createServer(app);
+  initSocket(httpServer);
+  startHoldCleanupWorker(10000);
+
+  httpServer.listen(env.PORT, () => {
     console.log(`[Server] IMovies backend listening on port ${env.PORT} in ${env.NODE_ENV} mode`);
     console.log(`[Server] Health check: http://localhost:${env.PORT}/api/health`);
+    console.log(`[Server] Socket.IO real-time engine ready`);
   });
 
   const shutdown = async (signal) => {
     console.log(`\n[Server] Received ${signal}. Shutting down gracefully...`);
-    if (server) {
-      server.close(() => {
+    stopHoldCleanupWorker();
+    closeSocket();
+    if (httpServer) {
+      httpServer.close(() => {
         console.log('[Server] HTTP server closed');
       });
     }

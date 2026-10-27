@@ -32,6 +32,16 @@ const showSeatSchema = new mongoose.Schema(
       type: Date,
       default: null,
     },
+    holdExpiresAt: {
+      type: Date,
+      default: null,
+    },
+    holdToken: {
+      type: String,
+      default: null,
+      trim: true,
+      uppercase: true,
+    },
   },
   { _id: false }
 );
@@ -114,6 +124,7 @@ const showSchema = new mongoose.Schema(
 showSchema.index({ theatre: 1, startTime: 1 });
 showSchema.index({ movie: 1, startTime: 1 });
 showSchema.index({ screen: 1, startTime: 1 });
+showSchema.index({ 'seats.holdExpiresAt': 1 });
 
 export const Show = mongoose.model('Show', showSchema);
 export default Show;

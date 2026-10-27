@@ -1,11 +1,20 @@
 import { Booking } from '../models/booking.model.js';
 import { Show } from '../models/show.model.js';
 import { Notification } from '../models/notification.model.js';
+import { SeatHold } from '../models/seatHold.model.js';
+import { emitSeatBooked, emitSeatReleased } from '../socket.js';
 
 export async function createBooking(req, res, next) {
   try {
-    const { showId } = req.body;
-    const seatNumbers = (req.body.seatNumbers || []).map((s) => s.trim().toUpperCase());
+    const { showId, holdToken } = req.body;
+    const seatNumbers = (req.body.seatNumbers || []).map((s) => String(s).trim().toUpperCase());
+
+    if (seatNumbers.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'At least one seatNumber is required to book tickets',
+      });
+    }
 
     // 1. Verify existence and schedule status of the show
     const show = await Show.findById(showId).populate('movie', 'title');
@@ -30,7 +39,7 @@ export async function createBooking(req, res, next) {
       });
     }
 
-    // 2. Validate seat existence and current availability in show inventory
+    // 2. Validate seat existence in show inventory
     const seatMap = new Map((show.seats || []).map((s) => [s.seatNumber, s]));
 
     for (const num of seatNumbers) {
@@ -41,50 +50,126 @@ export async function createBooking(req, res, next) {
           message: `Seat "${num}" does not exist in the screen layout for this show`,
         });
       }
-      if (seat.status !== 'available') {
+    }
+
+    const now = new Date();
+    let verifiedHold = null;
+
+    // 3. Handle Seat Hold verification if holdToken provided
+    if (holdToken) {
+      verifiedHold = await SeatHold.findOne({ holdToken, show: showId });
+
+      if (!verifiedHold) {
+        return res.status(404).json({
+          success: false,
+          message: 'Specified seat hold was not found',
+        });
+      }
+
+      if (verifiedHold.user.toString() !== req.user._id.toString()) {
+        return res.status(403).json({
+          success: false,
+          message: 'Forbidden: You are not the owner of this seat hold',
+        });
+      }
+
+      if (verifiedHold.status !== 'active') {
         return res.status(409).json({
           success: false,
-          message: `Seat "${num}" is already ${seat.status} and cannot be booked`,
+          message: `This seat hold is ${verifiedHold.status} and cannot be converted into a confirmed booking`,
+        });
+      }
+
+      if (new Date(verifiedHold.expiresAt) <= now) {
+        verifiedHold.status = 'expired';
+        await verifiedHold.save();
+        return res.status(409).json({
+          success: false,
+          message: 'Your seat hold has expired. Please select your seats again.',
         });
       }
     }
 
-    // 3. Authoritative server-side price calculation
+    // 4. Authoritative server-side price calculation
     const totalAmount = seatNumbers.reduce((sum, num) => sum + seatMap.get(num).price, 0);
 
-    // 4. Atomic conditional update to prevent double-booking collisions
-    // Guaranteed atomic in MongoDB standalone via document-level locks
-    const updatedShow = await Show.findOneAndUpdate(
-      {
-        _id: showId,
-        status: 'scheduled',
-        seats: {
-          $all: seatNumbers.map((num) => ({
-            $elemMatch: { seatNumber: num, status: 'available' },
-          })),
+    // 5. Atomic conditional update to prevent double-booking or racing
+    let updatedShow;
+
+    if (holdToken) {
+      // Hold conversion: seats must be 'reserved' with matching holdToken and reservedBy
+      updatedShow = await Show.findOneAndUpdate(
+        {
+          _id: showId,
+          status: 'scheduled',
+          seats: {
+            $all: seatNumbers.map((num) => ({
+              $elemMatch: {
+                seatNumber: num,
+                status: 'reserved',
+                reservedBy: req.user._id,
+                holdToken: holdToken,
+                holdExpiresAt: { $gt: now },
+              },
+            })),
+          },
         },
-      },
-      {
-        $set: {
-          'seats.$[elem].status': 'booked',
-          'seats.$[elem].reservedBy': req.user._id,
-          'seats.$[elem].reservedAt': new Date(),
+        {
+          $set: {
+            'seats.$[elem].status': 'booked',
+            'seats.$[elem].reservedBy': req.user._id,
+            'seats.$[elem].reservedAt': now,
+            'seats.$[elem].holdExpiresAt': null,
+            'seats.$[elem].holdToken': null,
+          },
         },
-      },
-      {
-        arrayFilters: [{ 'elem.seatNumber': { $in: seatNumbers } }],
-        new: true,
-      }
-    );
+        {
+          arrayFilters: [{ 'elem.seatNumber': { $in: seatNumbers } }],
+          new: true,
+        }
+      );
+    } else {
+      // Direct booking (backward compatibility): seats must be available or expired
+      updatedShow = await Show.findOneAndUpdate(
+        {
+          _id: showId,
+          status: 'scheduled',
+          seats: {
+            $all: seatNumbers.map((num) => ({
+              $elemMatch: {
+                seatNumber: num,
+                $or: [
+                  { status: 'available' },
+                  { status: 'reserved', holdExpiresAt: { $lte: now } },
+                ],
+              },
+            })),
+          },
+        },
+        {
+          $set: {
+            'seats.$[elem].status': 'booked',
+            'seats.$[elem].reservedBy': req.user._id,
+            'seats.$[elem].reservedAt': now,
+            'seats.$[elem].holdExpiresAt': null,
+            'seats.$[elem].holdToken': null,
+          },
+        },
+        {
+          arrayFilters: [{ 'elem.seatNumber': { $in: seatNumbers } }],
+          new: true,
+        }
+      );
+    }
 
     if (!updatedShow) {
       return res.status(409).json({
         success: false,
-        message: 'One or more selected seats were just reserved by another user. Please choose different seats.',
+        message: 'One or more selected seats were just reserved by another user or hold has expired. Please choose different seats.',
       });
     }
 
-    // 5. Create the Booking document
+    // 6. Create the Booking document
     const bookingReference = `IMV-${Date.now().toString(36).toUpperCase()}-${Math.random()
       .toString(36)
       .substring(2, 6)
@@ -111,6 +196,12 @@ export async function createBooking(req, res, next) {
         paymentStatus: 'unpaid', // Simulated unpaid per specification
       });
 
+      // Mark hold as completed if one was used
+      if (verifiedHold) {
+        verifiedHold.status = 'completed';
+        await verifiedHold.save();
+      }
+
       // User confirmation notification
       await Notification.create({
         user: req.user._id,
@@ -119,6 +210,9 @@ export async function createBooking(req, res, next) {
         message: `Booking ${bookingReference} for "${show.movie?.title || 'Movie'}" confirmed (${bookedSeats.length} seats). Payment status: Unpaid (Simulation Mode).`,
         metadata: { bookingId: booking._id, bookingReference },
       });
+
+      // Real-time broadcast
+      emitSeatBooked(showId.toString(), { seatNumbers });
     } catch (createErr) {
       // Rollback seat reservation on booking creation failure
       await Show.updateOne(
@@ -128,6 +222,8 @@ export async function createBooking(req, res, next) {
             'seats.$[elem].status': 'available',
             'seats.$[elem].reservedBy': null,
             'seats.$[elem].reservedAt': null,
+            'seats.$[elem].holdExpiresAt': null,
+            'seats.$[elem].holdToken': null,
           },
         },
         { arrayFilters: [{ 'elem.seatNumber': { $in: seatNumbers } }] }
@@ -188,7 +284,6 @@ export async function getBookingById(req, res, next) {
       });
     }
 
-    // Ownership check: users can only view their own bookings, admins can view any
     const isOwner = booking.user._id.toString() === req.user._id.toString();
     const isAdmin = req.user.role === 'admin';
 
@@ -236,7 +331,6 @@ export async function cancelBooking(req, res, next) {
       });
     }
 
-    // Cancellation business rule: cannot cancel after show start time
     if (booking.show && new Date(booking.show.startTime) <= new Date()) {
       return res.status(400).json({
         success: false,
@@ -262,6 +356,8 @@ export async function cancelBooking(req, res, next) {
           'seats.$[elem].status': 'available',
           'seats.$[elem].reservedBy': null,
           'seats.$[elem].reservedAt': null,
+          'seats.$[elem].holdExpiresAt': null,
+          'seats.$[elem].holdToken': null,
         },
       },
       {
@@ -277,6 +373,9 @@ export async function cancelBooking(req, res, next) {
       message: `Your booking ${booking.bookingReference} has been cancelled and seats released.`,
       metadata: { bookingId: booking._id, bookingReference: booking.bookingReference },
     });
+
+    // Real-time broadcast
+    emitSeatReleased(showId.toString(), { seatNumbers });
 
     return res.status(200).json({
       success: true,

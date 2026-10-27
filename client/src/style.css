@@ -264,10 +264,64 @@ body {
 
 .seat-reserved {
   background: #2a2015 !important;
-  color: #78350f !important;
+  color: #d97706 !important;
+  border-color: #b45309 !important;
+  cursor: not-allowed !important;
+  opacity: 0.85;
+}
+
+.seat-held-by-me {
+  background: #78350f !important;
+  color: #fef3c7 !important;
+  border-color: #f59e0b !important;
+  box-shadow: 0 0 10px rgba(245, 158, 11, 0.6);
+  animation: holdPulse 2s infinite ease-in-out;
+}
+
+@keyframes holdPulse {
+  0%, 100% {
+    box-shadow: 0 0 8px rgba(245, 158, 11, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 16px rgba(245, 158, 11, 0.9);
+  }
+}
+
+.seat-held-by-other {
+  background: #231a10 !important;
+  color: #d97706 !important;
   border-color: #92400e !important;
   cursor: not-allowed !important;
-  opacity: 0.7;
+  opacity: 0.75;
+}
+
+.hold-countdown-banner {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(217, 119, 6, 0.08) 100%);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  border-radius: 10px;
+  padding: 12px 18px;
+}
+
+.realtime-badge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.realtime-badge-connected {
+  background: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.realtime-badge-polling {
+  background: rgba(245, 158, 11, 0.15);
+  color: #fbbf24;
+  border: 1px solid rgba(245, 158, 11, 0.3);
 }
 
 .legend-dot {

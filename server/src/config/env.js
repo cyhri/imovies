@@ -41,6 +41,12 @@ export function validateEnv(customEnv = process.env) {
 
   const JWT_EXPIRES_IN = customEnv.JWT_EXPIRES_IN || '7d';
 
+  const rawHoldDuration = customEnv.HOLD_DURATION_SECONDS || '300';
+  const HOLD_DURATION_SECONDS = parseInt(rawHoldDuration, 10);
+  if (isNaN(HOLD_DURATION_SECONDS) || HOLD_DURATION_SECONDS < 5) {
+    errors.push('HOLD_DURATION_SECONDS must be an integer of at least 5 seconds.');
+  }
+
   if (errors.length > 0) {
     throw new Error(`Environment validation failed:\n - ${errors.join('\n - ')}`);
   }
@@ -53,6 +59,7 @@ export function validateEnv(customEnv = process.env) {
     CORS_ORIGIN,
     JWT_SECRET,
     JWT_EXPIRES_IN,
+    HOLD_DURATION_SECONDS,
   });
 }
 

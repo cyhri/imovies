@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { createRoot } from "react-dom/client";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./style.css";
+import { io } from "socket.io-client";
 import {
   fetchMovies,
   fetchMovieById,
@@ -24,6 +25,9 @@ import {
   cancelBooking,
   loginUser,
   registerUser,
+  createSeatHold,
+  releaseSeatHold,
+  fetchSeatHold,
   fetchAdminOverview,
   fetchAdminBookings,
 } from "./services/api.js";
@@ -73,6 +77,12 @@ function App() {
   const [showLoading, setShowLoading] = useState(false);
   const [showError, setShowError] = useState(null);
   const [selectedSeats, setSelectedSeats] = useState([]);
+
+  // Real-Time Socket & Hold State
+  const [socketConnected, setSocketConnected] = useState(false);
+  const [activeHold, setActiveHold] = useState(null); // { holdToken, expiresAt, seats, remainingSeconds }
+  const [holdLoading, setHoldLoading] = useState(false);
+  const [holdError, setHoldError] = useState(null);
 
   // Booking Review & Submission
   const [reviewModalOpen, setReviewModalOpen] = useState(false);
@@ -158,6 +168,163 @@ function App() {
   const [adminBookingsLoading, setAdminBookingsLoading] = useState(false);
   const [bookingFilterStatus, setBookingFilterStatus] = useState("all");
   const [bookingSearch, setBookingSearch] = useState("");
+
+
+  // ---------------------------------------------------------------------------
+  // Real-Time Socket.IO Synchronization for Active Show
+  // ---------------------------------------------------------------------------
+  useEffect(() => {
+    if (!activeShow?._id) return;
+
+    const socketUrl = window.location.origin.includes(":5173")
+      ? "http://localhost:5000"
+      : window.location.origin;
+
+    const socket = io(socketUrl, {
+      transports: ["websocket", "polling"],
+      reconnectionAttempts: 10,
+    });
+
+    socket.on("connect", () => {
+      setSocketConnected(true);
+      socket.emit("join:show", activeShow._id);
+    });
+
+    socket.on("disconnect", () => {
+      setSocketConnected(false);
+    });
+
+    socket.on("seats:held", ({ showId, seatNumbers, holdExpiresAt, userId }) => {
+      if (showId !== activeShow._id) return;
+      setActiveShow((prev) => {
+        if (!prev) return prev;
+        const currentId = currentUser?.id || currentUser?._id;
+        const isMine = userId && currentId && String(userId) === String(currentId);
+        const updated = (prev.seats || []).map((s) => {
+          if (seatNumbers.includes(s.seatNumber)) {
+            return {
+              ...s,
+              status: "reserved",
+              holdExpiresAt,
+              reservedBy: userId,
+              isHeldByMe: isMine,
+            };
+          }
+          return s;
+        });
+        return { ...prev, seats: updated };
+      });
+    });
+
+    socket.on("seats:released", ({ showId, seatNumbers }) => {
+      if (showId !== activeShow._id) return;
+      setActiveShow((prev) => {
+        if (!prev) return prev;
+        const updated = (prev.seats || []).map((s) => {
+          if (seatNumbers.includes(s.seatNumber)) {
+            return {
+              ...s,
+              status: "available",
+              holdExpiresAt: null,
+              reservedBy: null,
+              holdToken: null,
+              isHeldByMe: false,
+            };
+          }
+          return s;
+        });
+        return { ...prev, seats: updated };
+      });
+    });
+
+    socket.on("seats:expired", ({ showId, seatNumbers }) => {
+      if (showId !== activeShow._id) return;
+      setActiveShow((prev) => {
+        if (!prev) return prev;
+        const updated = (prev.seats || []).map((s) => {
+          if (seatNumbers.includes(s.seatNumber)) {
+            return {
+              ...s,
+              status: "available",
+              holdExpiresAt: null,
+              reservedBy: null,
+              holdToken: null,
+              isHeldByMe: false,
+            };
+          }
+          return s;
+        });
+        return { ...prev, seats: updated };
+      });
+    });
+
+    socket.on("seats:booked", ({ showId, seatNumbers }) => {
+      if (showId !== activeShow._id) return;
+      setActiveShow((prev) => {
+        if (!prev) return prev;
+        const updated = (prev.seats || []).map((s) => {
+          if (seatNumbers.includes(s.seatNumber)) {
+            return {
+              ...s,
+              status: "booked",
+              holdExpiresAt: null,
+              isHeldByMe: false,
+            };
+          }
+          return s;
+        });
+        return { ...prev, seats: updated };
+      });
+    });
+
+    // Polling fallback every 8 seconds if socket disconnects
+    const pollInterval = setInterval(async () => {
+      if (!socket.connected) {
+        try {
+          const res = await fetchShowById(activeShow._id);
+          setActiveShow(res.data);
+        } catch {}
+      }
+    }, 8000);
+
+    return () => {
+      clearInterval(pollInterval);
+      socket.emit("leave:show", activeShow._id);
+      socket.disconnect();
+      setSocketConnected(false);
+    };
+  }, [activeShow?._id, currentUser?.id, currentUser?._id]);
+
+  // ---------------------------------------------------------------------------
+  // Hold Countdown Timer & Auto-Release
+  // ---------------------------------------------------------------------------
+  useEffect(() => {
+    if (!activeHold?.expiresAt) return;
+
+    const tick = () => {
+      const remaining = Math.max(
+        0,
+        Math.round((new Date(activeHold.expiresAt).getTime() - Date.now()) / 1000)
+      );
+      setActiveHold((prev) => (prev ? { ...prev, remainingSeconds: remaining } : null));
+
+      if (remaining <= 0) {
+        setHoldError("Your seat hold has expired. The seats have been released.");
+        setReviewModalOpen(false);
+        setActiveHold(null);
+        setSelectedSeats([]);
+        if (activeShow?._id) {
+          fetchShowById(activeShow._id)
+            .then((res) => setActiveShow(res.data))
+            .catch(() => {});
+        }
+      }
+    };
+
+    tick();
+    const interval = setInterval(tick, 1000);
+    return () => clearInterval(interval);
+  }, [activeHold?.expiresAt, activeShow?._id]);
 
   // ---------------------------------------------------------------------------
   // Load Storefront Movie Catalog
@@ -628,7 +795,9 @@ function App() {
     closeDetails();
     setShowLoading(true);
     setShowError(null);
+    setHoldError(null);
     setSelectedSeats([]);
+    setActiveHold(null);
     try {
       const res = await fetchShowById(showId);
       setActiveShow(res.data);
@@ -639,10 +808,17 @@ function App() {
     }
   };
 
-  const closeSeatSelection = () => {
+  const closeSeatSelection = async () => {
+    if (activeHold?.holdToken && activeShow?._id && authToken) {
+      try {
+        await releaseSeatHold(activeShow._id, activeHold.holdToken, authToken);
+      } catch {}
+    }
     setActiveShow(null);
+    setActiveHold(null);
     setSelectedSeats([]);
     setShowError(null);
+    setHoldError(null);
   };
 
   const handleSeatClick = (seat) => {
@@ -658,13 +834,45 @@ function App() {
     activeShow?.seats?.filter((s) => selectedSeats.includes(s.seatNumber)) || [];
   const calculatedTotal = selectedSeatObjects.reduce((sum, s) => sum + (s.price || 0), 0);
 
-  const handleProceedToReview = () => {
+  const handleProceedToReview = async () => {
     if (selectedSeats.length === 0) return;
     if (!authToken) {
       setAuthModalOpen(true);
       return;
     }
-    setReviewModalOpen(true);
+    setHoldLoading(true);
+    setHoldError(null);
+    try {
+      const res = await createSeatHold(activeShow._id, selectedSeats, authToken);
+      setActiveHold(res.data);
+      setReviewModalOpen(true);
+    } catch (err) {
+      setHoldError(err.message || "Failed to place seat hold. Seats may have been reserved by another customer.");
+      try {
+        const refreshed = await fetchShowById(activeShow._id);
+        setActiveShow(refreshed.data);
+      } catch {}
+    } finally {
+      setHoldLoading(false);
+    }
+  };
+
+  const handleReleaseHold = async () => {
+    if (!activeHold?.holdToken || !activeShow?._id || !authToken) {
+      setActiveHold(null);
+      setReviewModalOpen(false);
+      return;
+    }
+    try {
+      await releaseSeatHold(activeShow._id, activeHold.holdToken, authToken);
+    } catch {}
+    setActiveHold(null);
+    setReviewModalOpen(false);
+    setSelectedSeats([]);
+    try {
+      const refreshed = await fetchShowById(activeShow._id);
+      setActiveShow(refreshed.data);
+    } catch {}
   };
 
   const handleConfirmBooking = async () => {
@@ -676,10 +884,15 @@ function App() {
     setBookingError(null);
     try {
       const res = await createBooking(
-        { showId: activeShow._id, seatNumbers: selectedSeats },
+        {
+          showId: activeShow._id,
+          seatNumbers: selectedSeats,
+          holdToken: activeHold?.holdToken,
+        },
         authToken
       );
       setConfirmedBooking(res.data);
+      setActiveHold(null);
       setReviewModalOpen(false);
       const updatedShow = await fetchShowById(activeShow._id);
       setActiveShow(updatedShow.data);
@@ -1406,7 +1619,12 @@ function App() {
           <main className="container py-4 flex-grow-1">
             <div className="d-flex flex-wrap justify-content-between align-items-center pb-3 mb-4 border-bottom border-secondary">
               <div>
-                <span className="badge bg-danger mb-1">{activeShow.screen?.screenType || "2D"}</span>
+                <div className="d-flex align-items-center gap-2 mb-1">
+                  <span className="badge bg-danger">{activeShow.screen?.screenType || "2D"}</span>
+                  <span className={`realtime-badge ${socketConnected ? "realtime-badge-connected" : "realtime-badge-polling"}`}>
+                    {socketConnected ? "● Live Availability" : "○ Polling Mode"}
+                  </span>
+                </div>
                 <h3 className="fw-bold text-white mb-0">{activeShow.movie?.title}</h3>
                 <p className="text-secondary small mb-0 mt-1">
                   {activeShow.theatre?.name} ({activeShow.theatre?.city}) Â·{" "}
@@ -1443,6 +1661,30 @@ function App() {
 
             {showError && <div className="alert alert-danger">{showError}</div>}
 
+            {holdError && (
+              <div className="alert alert-warning alert-dismissible fade show d-flex justify-content-between align-items-center mb-3">
+                <span>⚠️ {holdError}</span>
+                <button type="button" className="btn-close btn-close-white" onClick={() => setHoldError(null)} />
+              </div>
+            )}
+
+            {activeHold && (
+              <div className="hold-countdown-banner mb-3 d-flex align-items-center justify-content-between flex-wrap gap-2">
+                <div className="d-flex align-items-center gap-2">
+                  <span className="badge bg-warning text-dark px-3 py-2 fs-6 fw-bold">
+                    ⏱ {Math.floor((activeHold.remainingSeconds || 0) / 60)}:
+                    {String((activeHold.remainingSeconds || 0) % 60).padStart(2, "0")}
+                  </span>
+                  <span className="text-warning fw-semibold">
+                    Seats {selectedSeats.join(", ")} held exclusively for you!
+                  </span>
+                </div>
+                <button className="btn btn-sm btn-outline-warning" onClick={handleReleaseHold}>
+                  Release Hold
+                </button>
+              </div>
+            )}
+
             {!showLoading && !showError && (
               <div className="p-4 rounded-3 text-center" style={{ background: "#14141e", border: "1px solid rgba(255,255,255,0.08)" }}>
                 <div className="screen-visual" />
@@ -1453,6 +1695,10 @@ function App() {
                       <span className="row-label">{row}</span>
                       {seats.map((seat) => {
                         const isSelected = selectedSeats.includes(seat.seatNumber);
+                        const isHeldByMe = (activeHold && selectedSeats.includes(seat.seatNumber)) || seat.isHeldByMe;
+                        const isHeldByOther = seat.status === "reserved" && !isHeldByMe;
+                        const isBooked = seat.status === "booked";
+
                         const tierClass =
                           seat.tier === "vip"
                             ? "seat-vip"
@@ -1460,23 +1706,28 @@ function App() {
                             ? "seat-premium"
                             : "seat-standard";
 
-                        const statusClass =
-                          seat.status === "booked"
-                            ? "seat-booked"
-                            : seat.status === "reserved"
-                            ? "seat-reserved"
-                            : isSelected
-                            ? "seat-selected"
-                            : tierClass;
+                        let statusClass = tierClass;
+                        if (isBooked) statusClass = "seat-booked";
+                        else if (isHeldByMe) statusClass = "seat-held-by-me";
+                        else if (isHeldByOther) statusClass = "seat-held-by-other";
+                        else if (isSelected) statusClass = "seat-selected";
+
+                        const seatTitle = isBooked
+                          ? `${seat.seatNumber} - Booked`
+                          : isHeldByMe
+                          ? `${seat.seatNumber} - Held by You (Active Hold)`
+                          : isHeldByOther
+                          ? `${seat.seatNumber} - Temporarily Held by Another Customer`
+                          : `${seat.seatNumber} (${seat.tier?.toUpperCase()}) - $${seat.price}`;
 
                         return (
                           <button
                             key={seat.seatNumber}
                             type="button"
                             className={`seat-btn ${statusClass}`}
-                            disabled={seat.status !== "available"}
+                            disabled={isBooked || isHeldByOther || (Boolean(activeHold) && !isHeldByMe)}
                             onClick={() => handleSeatClick(seat)}
-                            title={`${seat.seatNumber} Â· ${seat.tier?.toUpperCase()} Â· $${seat.price}`}
+                            title={seatTitle}
                           >
                             {seat.seatNumber}
                           </button>
@@ -1502,6 +1753,12 @@ function App() {
                   </div>
                   <div>
                     <span className="legend-dot seat-selected" /> Selected
+                  </div>
+                  <div>
+                    <span className="legend-dot seat-held-by-me" /> Held by You
+                  </div>
+                  <div>
+                    <span className="legend-dot seat-held-by-other" /> Held by Others
                   </div>
                   <div>
                     <span className="legend-dot seat-booked" /> Booked
@@ -1535,10 +1792,14 @@ function App() {
 
                     <button
                       className="btn btn-danger btn-lg px-4 fw-semibold"
-                      disabled={selectedSeats.length === 0}
+                      disabled={selectedSeats.length === 0 || holdLoading}
                       onClick={handleProceedToReview}
                     >
-                      Proceed to Review ({selectedSeats.length})
+                      {holdLoading
+                        ? "Holding Seats..."
+                        : activeHold
+                        ? `Proceed to Review (${selectedSeats.length})`
+                        : `Hold Seats & Review (${selectedSeats.length})`}
                     </button>
                   </div>
                 </div>
@@ -2225,6 +2486,18 @@ function App() {
                 <h4 className="fw-bold text-white mb-0">Review Booking Details</h4>
                 <div className="text-secondary small">Confirm tickets before reserving</div>
               </div>
+
+            {activeHold && (
+              <div className="alert alert-warning py-2 px-3 small d-flex align-items-center justify-content-between mt-3 mb-3">
+                <div>
+                  ⏱ <strong>Hold Token:</strong> <code className="text-dark fw-bold">{activeHold.holdToken}</code>
+                </div>
+                <span className="badge bg-warning text-dark fs-6 fw-bold">
+                  {Math.floor((activeHold.remainingSeconds || 0) / 60)}:
+                  {String((activeHold.remainingSeconds || 0) % 60).padStart(2, "0")}
+                </span>
+              </div>
+            )}
               <button className="btn btn-sm btn-outline-secondary text-white" onClick={() => setReviewModalOpen(false)}>
                 âœ•
               </button>

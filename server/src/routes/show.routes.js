@@ -3,26 +3,28 @@ import {
   getShows,
   getShowById,
   createShow,
-  updateShow,
   cancelShow,
 } from '../controllers/show.controller.js';
 import {
-  validateCreateShow,
-  validateUpdateShow,
-} from '../validators/show.validator.js';
-import { validateObjectId } from '../validators/movie.validator.js';
+  createSeatHold,
+  releaseSeatHold,
+  getSeatHold,
+} from '../controllers/hold.controller.js';
 import { authenticate, authorize } from '../middleware/auth.middleware.js';
 
 const router = Router();
 
 // Public routes
 router.get('/', getShows);
-router.get('/:id', validateObjectId('id'), getShowById);
+router.get('/:id', getShowById);
 
-// Admin-protected routes
-router.post('/', authenticate, authorize('admin'), validateCreateShow, createShow);
-router.put('/:id', authenticate, authorize('admin'), validateObjectId('id'), validateUpdateShow, updateShow);
-router.patch('/:id/cancel', authenticate, authorize('admin'), validateObjectId('id'), cancelShow);
-router.delete('/:id', authenticate, authorize('admin'), validateObjectId('id'), cancelShow);
+// Seat holds routes (Authenticated customer)
+router.post('/:id/holds', authenticate, createSeatHold);
+router.get('/:id/holds/:holdToken', authenticate, getSeatHold);
+router.delete('/:id/holds/:holdToken', authenticate, releaseSeatHold);
+
+// Admin-only show operations
+router.post('/', authenticate, authorize('admin'), createShow);
+router.patch('/:id/cancel', authenticate, authorize('admin'), cancelShow);
 
 export default router;
