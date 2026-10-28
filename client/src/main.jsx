@@ -35,6 +35,146 @@ import {
 const GENRES = ["All", "Action", "Adventure", "Comedy", "Drama", "Horror", "Sci-Fi", "Thriller"];
 const RATINGS = ["All", "G", "PG", "PG-13", "R", "NC-17", "U", "UA", "A"];
 const SCREEN_TYPES = ["2D", "3D", "IMAX", "4DX", "Dolby Cinema"];
+const FORMAT_TABS = ["ALL FORMATS", "IMAX", "DOLBY CINEMA", "4DX"];
+
+const FEATURED_MOVIES = [
+  {
+    title: "Chronos: Beyond Horizons",
+    headlinePart1: "CHRONOS:",
+    headlinePart2: "BEYOND HORIZONS",
+    tag: "NOW SHOWING — IMAX 70MM EXCLUSIVE",
+    rating: "PG-13",
+    genreText: "Sci-Fi / Thriller",
+    durationText: "2h 45m",
+    scoreText: "★ 4.8 (12.4k ratings)",
+    audioTag: "DOLBY ATMOS",
+    visualTag: "IMAX LASER",
+    synopsis:
+      "When humanity's final interstellar relay falls silent, a renegade astro-engineer must journey directly into the event horizon to salvage an anomaly that rewrites the fabric of spacetime.",
+    upNextTitle: "The Velvet Heist",
+    upNextSub: "Starts in 25 mins — Screen 02",
+    upNextFormat: "UP NEXT IN IMAX 70MM",
+    accentColor: "#ff5500",
+  },
+  {
+    title: "The Velvet Heist",
+    headlinePart1: "THE VELVET",
+    headlinePart2: "HEIST",
+    tag: "NOW SHOWING — DOLBY VISION",
+    rating: "R",
+    genreText: "Crime / Noir / Thriller",
+    durationText: "1h 58m",
+    scoreText: "★ 4.7 (8.2k ratings)",
+    audioTag: "DOLBY ATMOS",
+    visualTag: "DOLBY CINEMA",
+    synopsis:
+      "In the rain-slicked neon labyrinths of Neo-Verona, an elite heist collective breaches an subterranean corporate citadel to recover encrypted neural memories.",
+    upNextTitle: "Aetheria: Kingdom of Sky",
+    upNextSub: "Starts in 45 mins — Screen 04",
+    upNextFormat: "UP NEXT IN DOLBY CINEMA",
+    accentColor: "#06b6d4",
+  },
+  {
+    title: "Aetheria: Kingdom of Sky",
+    headlinePart1: "AETHERIA:",
+    headlinePart2: "KINGDOM OF SKY",
+    tag: "NOW SHOWING — REALD 3D",
+    rating: "PG",
+    genreText: "Fantasy / Animation",
+    durationText: "1h 48m",
+    scoreText: "★ 4.9 (15.1k ratings)",
+    audioTag: "SPATIAL AUDIO",
+    visualTag: "REALD 3D",
+    synopsis:
+      "Above the cloud canopy, an intrepid young skimmer unearths a forgotten relic capable of re-anchoring the floating islands before the solar rift tears their sanctuary apart.",
+    upNextTitle: "Shadow Protocol: Zero",
+    upNextSub: "Starts in 1h 10m — Screen 01",
+    upNextFormat: "UP NEXT IN 4DX",
+    accentColor: "#a855f7",
+  },
+  {
+    title: "Shadow Protocol: Zero",
+    headlinePart1: "SHADOW PROTOCOL:",
+    headlinePart2: "ZERO",
+    tag: "NOW SHOWING — LIVE CRITICS CHOICE",
+    rating: "R",
+    genreText: "Action / Espionage",
+    durationText: "2h 18m",
+    scoreText: "★ 4.6 (9.8k ratings)",
+    audioTag: "DTS:X IMMERSIVE",
+    visualTag: "4DX MOTION",
+    synopsis:
+      "Framed for an orbital intelligence sabotage, an elite operative wages a relentless counter-insurgency across three continents to avert automated global cyberwarfare.",
+    upNextTitle: "Chronos: Beyond Horizons",
+    upNextSub: "Starts in 1h 35m — Screen 03",
+    upNextFormat: "UP NEXT IN IMAX 70MM",
+    accentColor: "#ff5500",
+  },
+];
+
+// Helper Artwork Component for Procedural Posters
+function ProceduralPoster({ title = "Cinema", genre = "Sci-Fi", format = "IMAX", index = 0 }) {
+  const gradients = [
+    "radial-gradient(circle at 50% 30%, #3b1d54 0%, #0d0e17 80%)",
+    "radial-gradient(circle at 50% 30%, #152e3d 0%, #090e14 80%)",
+    "radial-gradient(circle at 50% 30%, #442a17 0%, #120e0c 80%)",
+    "radial-gradient(circle at 50% 30%, #1a2e26 0%, #08110e 80%)",
+  ];
+  const bg = gradients[index % gradients.length];
+
+  return (
+    <div
+      style={{
+        position: "absolute",
+        top: 0,
+        left: 0,
+        width: "100%",
+        height: "100%",
+        background: bg,
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "space-between",
+        padding: "16px",
+        overflow: "hidden",
+      }}
+    >
+      <div
+        style={{
+          position: "absolute",
+          top: "-20%",
+          left: "-20%",
+          width: "140%",
+          height: "140%",
+          opacity: 0.15,
+          backgroundImage:
+            "radial-gradient(circle, #ffffff 1px, transparent 1px)",
+          backgroundSize: "16px 16px",
+          pointerEvents: "none",
+        }}
+      />
+      <div className="d-flex justify-content-between align-items-center" style={{ zIndex: 1 }}>
+        <span style={{ fontSize: "0.6rem", fontWeight: 800, letterSpacing: "1px", color: "#ff5500" }}>
+          {format}
+        </span>
+      </div>
+
+      <div style={{ textAlign: "center", margin: "auto 0", zIndex: 1 }}>
+        <div style={{ fontSize: "2rem", marginBottom: "8px", filter: "drop-shadow(0 0 12px rgba(255,85,0,0.4))" }}>
+          {index % 4 === 0 ? "🌌" : index % 4 === 1 ? "🏙️" : index % 4 === 2 ? "✨" : "⚡"}
+        </div>
+        <div style={{ fontSize: "0.75rem", fontWeight: 700, color: "#94a3b8", textTransform: "uppercase", letterSpacing: "1px" }}>
+          {genre}
+        </div>
+      </div>
+
+      <div style={{ zIndex: 1, borderTop: "1px solid rgba(255,255,255,0.1)", paddingTop: "8px" }}>
+        <div style={{ fontSize: "0.72rem", color: "#64748b", textTransform: "uppercase", letterSpacing: "0.5px" }}>
+          ORIGINAL EXPERIENCE
+        </div>
+      </div>
+    </div>
+  );
+}
 
 function App() {
   // Current user & authentication state
@@ -64,6 +204,16 @@ function App() {
   const [selectedGenre, setSelectedGenre] = useState("All");
   const [selectedRating, setSelectedRating] = useState("All");
   const [sortBy, setSortBy] = useState("releaseDate");
+
+  // Stitch UI State
+  const [selectedFormat, setSelectedFormat] = useState("ALL FORMATS");
+  const [discoveryCinema, setDiscoveryCinema] = useState("");
+  const [discoveryDate, setDiscoveryDate] = useState("Today, Oct 24 (Evening)");
+  const [discoveryFormat, setDiscoveryFormat] = useState("All Formats");
+  const [heroIndex, setHeroIndex] = useState(0);
+  const [toastMessage, setToastMessage] = useState(null);
+  const [cinemasModalOpen, setCinemasModalOpen] = useState(false);
+  const [membershipModalOpen, setMembershipModalOpen] = useState(false);
 
   // Selected movie modal
   const [selectedMovie, setSelectedMovie] = useState(null);
@@ -169,6 +319,12 @@ function App() {
   const [bookingFilterStatus, setBookingFilterStatus] = useState("all");
   const [bookingSearch, setBookingSearch] = useState("");
 
+  const showToast = (msg) => {
+    setToastMessage(msg);
+    setTimeout(() => {
+      setToastMessage((prev) => (prev === msg ? null : prev));
+    }, 4000);
+  };
 
   // ---------------------------------------------------------------------------
   // Real-Time Socket.IO Synchronization for Active Show
@@ -301,28 +457,24 @@ function App() {
   useEffect(() => {
     if (!activeHold?.expiresAt) return;
 
-    const tick = () => {
-      const remaining = Math.max(
-        0,
-        Math.round((new Date(activeHold.expiresAt).getTime() - Date.now()) / 1000)
-      );
-      setActiveHold((prev) => (prev ? { ...prev, remainingSeconds: remaining } : null));
+    const interval = setInterval(() => {
+      const now = Date.now();
+      const expires = new Date(activeHold.expiresAt).getTime();
+      const diffSeconds = Math.max(0, Math.floor((expires - now) / 1000));
 
-      if (remaining <= 0) {
-        setHoldError("Your seat hold has expired. The seats have been released.");
-        setReviewModalOpen(false);
+      setActiveHold((prev) => (prev ? { ...prev, remainingSeconds: diffSeconds } : null));
+
+      if (diffSeconds <= 0) {
+        clearInterval(interval);
         setActiveHold(null);
-        setSelectedSeats([]);
+        setReviewModalOpen(false);
+        setHoldError("Your 5-minute seat hold expired. Please reselect your seats.");
         if (activeShow?._id) {
-          fetchShowById(activeShow._id)
-            .then((res) => setActiveShow(res.data))
-            .catch(() => {});
+          fetchShowById(activeShow._id).then((res) => setActiveShow(res.data)).catch(() => {});
         }
       }
-    };
+    }, 1000);
 
-    tick();
-    const interval = setInterval(tick, 1000);
     return () => clearInterval(interval);
   }, [activeHold?.expiresAt, activeShow?._id]);
 
@@ -330,13 +482,10 @@ function App() {
   // Load Storefront Movie Catalog
   // ---------------------------------------------------------------------------
   const loadMovies = useCallback(async () => {
+    setLoading(true);
+    setError(null);
     try {
-      setLoading(true);
-      setError(null);
-      const params = {
-        sortBy,
-        order: sortBy === "title" ? "asc" : "desc",
-      };
+      const params = { sortBy };
       if (searchTerm.trim()) params.q = searchTerm.trim();
       if (selectedGenre !== "All") params.genre = selectedGenre;
       if (selectedRating !== "All") params.rating = selectedRating;
@@ -359,6 +508,18 @@ function App() {
     }
   }, [loadMovies, portalView]);
 
+  // Load theatres for discovery dropdown
+  useEffect(() => {
+    fetchTheatres({ all: true })
+      .then((res) => {
+        setAdminTheatres(res.data || []);
+        if (res.data?.length && !discoveryCinema) {
+          setDiscoveryCinema(res.data[0].name);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
   // ---------------------------------------------------------------------------
   // Authentication Management
   // ---------------------------------------------------------------------------
@@ -379,6 +540,7 @@ function App() {
       localStorage.setItem("imovies_token", token);
       localStorage.setItem("imovies_user", JSON.stringify(user));
       setAuthModalOpen(false);
+      showToast(`Welcome back, ${user.name}!`);
     } catch (err) {
       setAuthError(err.message || "Authentication failed");
     }
@@ -389,14 +551,15 @@ function App() {
     setCurrentUser(null);
     localStorage.removeItem("imovies_token");
     localStorage.removeItem("imovies_user");
-    setPortalView("storefront");
+    setMyBookings([]);
+    showToast("Signed out successfully.");
   };
 
   // ---------------------------------------------------------------------------
-  // Admin Data Fetchers
+  // Admin Data Fetching
   // ---------------------------------------------------------------------------
   const loadAdminOverview = useCallback(async () => {
-    if (!authToken || currentUser?.role !== "admin") return;
+    if (!authToken) return;
     setOverviewLoading(true);
     try {
       const res = await fetchAdminOverview(authToken);
@@ -406,21 +569,23 @@ function App() {
     } finally {
       setOverviewLoading(false);
     }
-  }, [authToken, currentUser]);
+  }, [authToken]);
 
   const loadAdminMovies = useCallback(async () => {
+    if (!authToken) return;
     setAdminMoviesLoading(true);
     try {
-      const res = await fetchMovies({ all: "true", limit: 100 });
+      const res = await fetchMovies({ all: "true" });
       setAdminMovies(res.data || []);
     } catch (err) {
       console.error(err);
     } finally {
       setAdminMoviesLoading(false);
     }
-  }, []);
+  }, [authToken]);
 
   const loadAdminTheatres = useCallback(async () => {
+    if (!authToken) return;
     setTheatresLoading(true);
     try {
       const res = await fetchTheatres({ all: "true" });
@@ -430,9 +595,10 @@ function App() {
     } finally {
       setTheatresLoading(false);
     }
-  }, []);
+  }, [authToken]);
 
   const loadAdminShows = useCallback(async () => {
+    if (!authToken) return;
     setShowsLoading(true);
     try {
       const res = await fetchShows({ includePast: "true" });
@@ -442,39 +608,35 @@ function App() {
     } finally {
       setShowsLoading(false);
     }
-  }, []);
+  }, [authToken]);
 
   const loadAdminBookings = useCallback(async () => {
-    if (!authToken || currentUser?.role !== "admin") return;
+    if (!authToken) return;
     setAdminBookingsLoading(true);
     try {
-      const res = await fetchAdminBookings(
-        { status: bookingFilterStatus, search: bookingSearch, limit: 50 },
-        authToken
-      );
+      const params = {};
+      if (bookingFilterStatus !== "all") params.status = bookingFilterStatus;
+      if (bookingSearch.trim()) params.search = bookingSearch.trim();
+      const res = await fetchAdminBookings(params, authToken);
       setAdminBookings(res.data || []);
     } catch (err) {
       console.error(err);
     } finally {
       setAdminBookingsLoading(false);
     }
-  }, [authToken, currentUser, bookingFilterStatus, bookingSearch]);
+  }, [authToken, bookingFilterStatus, bookingSearch]);
 
   useEffect(() => {
     if (portalView === "admin" && currentUser?.role === "admin") {
       if (adminTab === "overview") loadAdminOverview();
       if (adminTab === "movies") loadAdminMovies();
       if (adminTab === "theatres") loadAdminTheatres();
-      if (adminTab === "shows") {
-        loadAdminShows();
-        loadAdminMovies();
-        loadAdminTheatres();
-      }
+      if (adminTab === "shows") loadAdminShows();
       if (adminTab === "bookings") loadAdminBookings();
     }
   }, [
     portalView,
-    currentUser,
+    currentUser?.role,
     adminTab,
     loadAdminOverview,
     loadAdminMovies,
@@ -483,18 +645,16 @@ function App() {
     loadAdminBookings,
   ]);
 
-  // ---------------------------------------------------------------------------
-  // Admin Movie Actions
-  // ---------------------------------------------------------------------------
+  // Admin Movie CRUD
   const handleOpenAddMovie = () => {
     setEditingMovie(null);
     setMovieForm({
       title: "",
       description: "",
       duration: 120,
-      genres: "Action, Drama",
+      genres: "Action, Sci-Fi",
       language: "English",
-      releaseDate: new Date().toISOString().substring(0, 10),
+      releaseDate: new Date().toISOString().split("T")[0],
       rating: "PG-13",
       posterUrl: "",
       isActive: true,
@@ -506,15 +666,15 @@ function App() {
   const handleOpenEditMovie = (movie) => {
     setEditingMovie(movie);
     setMovieForm({
-      title: movie.title,
-      description: movie.description,
-      duration: movie.duration,
+      title: movie.title || "",
+      description: movie.description || "",
+      duration: movie.duration || 120,
       genres: (movie.genres || []).join(", "),
-      language: movie.language,
-      releaseDate: movie.releaseDate ? movie.releaseDate.substring(0, 10) : "",
+      language: movie.language || "English",
+      releaseDate: movie.releaseDate ? new Date(movie.releaseDate).toISOString().split("T")[0] : "",
       rating: movie.rating || "PG-13",
       posterUrl: movie.posterUrl || "",
-      isActive: movie.isActive,
+      isActive: movie.isActive ?? true,
     });
     setMovieFormError(null);
     setMovieModalOpen(true);
@@ -522,27 +682,14 @@ function App() {
 
   const handleSaveMovie = async (e) => {
     e.preventDefault();
-    setMovieFormError(null);
     setMovieFormLoading(true);
-
-    const genresArray = movieForm.genres
-      .split(",")
-      .map((g) => g.trim())
-      .filter((g) => g.length > 0);
-
-    const payload = {
-      title: movieForm.title.trim(),
-      description: movieForm.description.trim(),
-      duration: Number(movieForm.duration),
-      genres: genresArray,
-      language: movieForm.language.trim(),
-      releaseDate: movieForm.releaseDate,
-      rating: movieForm.rating,
-      posterUrl: movieForm.posterUrl.trim(),
-      isActive: Boolean(movieForm.isActive),
-    };
-
+    setMovieFormError(null);
     try {
+      const payload = {
+        ...movieForm,
+        duration: Number(movieForm.duration),
+        genres: movieForm.genres.split(",").map((g) => g.trim()).filter(Boolean),
+      };
       if (editingMovie) {
         await updateMovie(editingMovie._id, payload, authToken);
       } else {
@@ -551,8 +698,9 @@ function App() {
       setMovieModalOpen(false);
       loadAdminMovies();
       loadMovies();
+      showToast("Movie saved successfully.");
     } catch (err) {
-      setMovieFormError(err.message || "Failed to save movie");
+      setMovieFormError(err.message || "Failed to save movie.");
     } finally {
       setMovieFormLoading(false);
     }
@@ -560,21 +708,15 @@ function App() {
 
   const handleToggleMovieActive = async (movie) => {
     try {
-      if (movie.isActive) {
-        await deleteMovie(movie._id, authToken);
-      } else {
-        await updateMovie(movie._id, { isActive: true }, authToken);
-      }
+      await updateMovie(movie._id, { isActive: !movie.isActive }, authToken);
       loadAdminMovies();
       loadMovies();
     } catch (err) {
-      alert("Failed to update status: " + err.message);
+      alert("Failed to toggle movie state: " + err.message);
     }
   };
 
-  // ---------------------------------------------------------------------------
-  // Admin Theatre & Screen Actions
-  // ---------------------------------------------------------------------------
+  // Admin Theatre CRUD
   const handleOpenAddTheatre = () => {
     setEditingTheatre(null);
     setTheatreForm({ name: "", city: "", address: "", phone: "" });
@@ -585,9 +727,9 @@ function App() {
   const handleOpenEditTheatre = (theatre) => {
     setEditingTheatre(theatre);
     setTheatreForm({
-      name: theatre.name,
-      city: theatre.city,
-      address: theatre.address,
+      name: theatre.name || "",
+      city: theatre.city || "",
+      address: theatre.address || "",
       phone: theatre.phone || "",
     });
     setTheatreFormError(null);
@@ -605,24 +747,22 @@ function App() {
       }
       setTheatreModalOpen(false);
       loadAdminTheatres();
+      showToast("Venue saved successfully.");
     } catch (err) {
-      setTheatreFormError(err.message || "Failed to save theatre");
+      setTheatreFormError(err.message || "Failed to save theatre.");
     }
   };
 
   const handleToggleTheatreActive = async (theatre) => {
     try {
-      if (theatre.isActive) {
-        await deleteTheatre(theatre._id, authToken);
-      } else {
-        await updateTheatre(theatre._id, { isActive: true }, authToken);
-      }
+      await updateTheatre(theatre._id, { isActive: !theatre.isActive }, authToken);
       loadAdminTheatres();
     } catch (err) {
-      alert("Failed to update theatre: " + err.message);
+      alert("Failed to toggle theatre status: " + err.message);
     }
   };
 
+  // Admin Screen Management
   const handleSelectTheatreForScreens = async (theatre) => {
     setSelectedTheatreForScreens(theatre);
     setScreensLoading(true);
@@ -640,9 +780,9 @@ function App() {
     const nextNumber = theatreScreens.length + 1;
     setScreenForm({
       screenNumber: nextNumber,
-      name: `Screen ${nextNumber}`,
-      screenType: "2D",
-      seatingCapacity: 40,
+      name: `Auditorium ${nextNumber}`,
+      screenType: "IMAX",
+      seatingCapacity: 60,
     });
     setScreenFormError(null);
     setScreenModalOpen(true);
@@ -652,66 +792,56 @@ function App() {
     e.preventDefault();
     setScreenFormError(null);
     try {
-      await createScreen(
-        selectedTheatreForScreens._id,
-        {
-          screenNumber: Number(screenForm.screenNumber),
-          name: screenForm.name.trim(),
-          screenType: screenForm.screenType,
-          seatingCapacity: Number(screenForm.seatingCapacity),
-        },
-        authToken
-      );
+      await createScreen(selectedTheatreForScreens._id, screenForm, authToken);
       setScreenModalOpen(false);
       handleSelectTheatreForScreens(selectedTheatreForScreens);
+      showToast("Screen added to auditorium.");
     } catch (err) {
-      setScreenFormError(err.message || "Failed to add screen");
+      setScreenFormError(err.message || "Failed to add screen.");
     }
   };
 
   const handleDeleteScreen = async (screenId) => {
-    if (!window.confirm("Delete this screen auditorium?")) return;
+    if (!window.confirm("Remove screen? Active shows on this screen may be impacted.")) return;
     try {
       await deleteScreen(screenId, authToken);
       handleSelectTheatreForScreens(selectedTheatreForScreens);
     } catch (err) {
-      alert("Failed to delete screen: " + err.message);
+      alert("Failed to remove screen: " + err.message);
     }
   };
 
-  // ---------------------------------------------------------------------------
-  // Admin Showtime Actions
-  // ---------------------------------------------------------------------------
-  const handleOpenAddShow = () => {
+  // Admin Showtimes Management
+  const handleOpenAddShow = async () => {
     setShowForm({
       movieId: adminMovies[0]?._id || "",
       theatreId: adminTheatres[0]?._id || "",
       screenId: "",
       startTime: "",
       endTime: "",
-      priceStandard: 12,
-      pricePremium: 18,
-      priceVip: 25,
+      priceStandard: 14,
+      pricePremium: 20,
+      priceVip: 28,
     });
-    setAvailableScreensForShow([]);
     setShowFormError(null);
     if (adminTheatres[0]?._id) {
-      fetchScreensByTheatre(adminTheatres[0]._id).then((res) => {
+      try {
+        const res = await fetchScreensByTheatre(adminTheatres[0]._id);
         setAvailableScreensForShow(res.data || []);
-        if (res.data?.[0]) {
+        if (res.data?.length > 0) {
           setShowForm((prev) => ({ ...prev, screenId: res.data[0]._id }));
         }
-      });
+      } catch {}
     }
     setShowModalOpen(true);
   };
 
-  const handleTheatreChangeForShow = async (theatreId) => {
+  const handleShowTheatreChange = async (theatreId) => {
     setShowForm((prev) => ({ ...prev, theatreId, screenId: "" }));
     try {
       const res = await fetchScreensByTheatre(theatreId);
       setAvailableScreensForShow(res.data || []);
-      if (res.data?.[0]) {
+      if (res.data?.length > 0) {
         setShowForm((prev) => ({ ...prev, screenId: res.data[0]._id }));
       }
     } catch {}
@@ -719,34 +849,27 @@ function App() {
 
   const handleSaveShow = async (e) => {
     e.preventDefault();
-    setShowFormError(null);
     setShowFormLoading(true);
-
-    if (!showForm.screenId) {
-      setShowFormError("Please select a screen auditorium");
-      setShowFormLoading(false);
-      return;
-    }
-
-    const payload = {
-      movie: showForm.movieId,
-      theatre: showForm.theatreId,
-      screen: showForm.screenId,
-      startTime: new Date(showForm.startTime).toISOString(),
-      endTime: new Date(showForm.endTime).toISOString(),
-      pricing: [
-        { tier: "standard", price: Number(showForm.priceStandard) },
-        { tier: "premium", price: Number(showForm.pricePremium) },
-        { tier: "vip", price: Number(showForm.priceVip) },
-      ],
-    };
-
+    setShowFormError(null);
     try {
+      const payload = {
+        movieId: showForm.movieId,
+        theatreId: showForm.theatreId,
+        screenId: showForm.screenId,
+        startTime: new Date(showForm.startTime).toISOString(),
+        endTime: showForm.endTime ? new Date(showForm.endTime).toISOString() : undefined,
+        pricing: [
+          { tier: "standard", price: Number(showForm.priceStandard) },
+          { tier: "premium", price: Number(showForm.pricePremium) },
+          { tier: "vip", price: Number(showForm.priceVip) },
+        ],
+      };
       await createShow(payload, authToken);
       setShowModalOpen(false);
       loadAdminShows();
+      showToast("Screening scheduled successfully.");
     } catch (err) {
-      setShowFormError(err.message || "Failed to schedule show");
+      setShowFormError(err.message || "Failed to schedule screening.");
     } finally {
       setShowFormLoading(false);
     }
@@ -757,6 +880,7 @@ function App() {
     try {
       await cancelShow(showId, authToken);
       loadAdminShows();
+      showToast("Screening cancelled.");
     } catch (err) {
       alert("Failed to cancel show: " + err.message);
     }
@@ -801,6 +925,7 @@ function App() {
     try {
       const res = await fetchShowById(showId);
       setActiveShow(res.data);
+      window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (err) {
       setShowError(err.message || "Could not load seat map.");
     } finally {
@@ -897,6 +1022,7 @@ function App() {
       const updatedShow = await fetchShowById(activeShow._id);
       setActiveShow(updatedShow.data);
       setSelectedSeats([]);
+      showToast("Booking confirmed! Tickets issued.");
     } catch (err) {
       setBookingError(err.message || "Booking failed.");
       try {
@@ -940,6 +1066,7 @@ function App() {
         loadAdminBookings();
         loadAdminOverview();
       }
+      showToast("Booking cancelled successfully.");
     } catch (err) {
       alert("Cancellation failed: " + err.message);
     } finally {
@@ -963,84 +1090,208 @@ function App() {
     return rowMap;
   };
 
+  const handleHeroBookAction = (feat) => {
+    const matched =
+      movies.find((m) =>
+        m.title.toLowerCase().includes(feat.title.toLowerCase()) ||
+        feat.title.toLowerCase().includes(m.title.toLowerCase())
+      ) || movies[0];
+
+    if (matched) {
+      openMovieDetails(matched);
+    } else {
+      const el = document.getElementById("now-showing");
+      if (el) el.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
+  const handleFindShowtimesClick = () => {
+    if (discoveryFormat && discoveryFormat !== "All Formats") {
+      setSelectedFormat(discoveryFormat.includes("IMAX") ? "IMAX" : discoveryFormat.includes("Dolby") ? "DOLBY CINEMA" : "4DX");
+    }
+    const el = document.getElementById("now-showing");
+    if (el) el.scrollIntoView({ behavior: "smooth" });
+  };
+
+  // Filtered movies according to Stitch tabs
+  const filteredMovies = movies.filter((movie) => {
+    if (selectedFormat === "IMAX") {
+      return (
+        movie.title?.toLowerCase().includes("imax") ||
+        movie.genres?.some((g) => g.toLowerCase().includes("sci") || g.toLowerCase().includes("action"))
+      );
+    }
+    if (selectedFormat === "DOLBY CINEMA") {
+      return (
+        movie.title?.toLowerCase().includes("dolby") ||
+        movie.genres?.some((g) => g.toLowerCase().includes("drama") || g.toLowerCase().includes("crime") || g.toLowerCase().includes("mystery"))
+      );
+    }
+    if (selectedFormat === "4DX") {
+      return (
+        movie.genres?.some((g) => g.toLowerCase().includes("adventure") || g.toLowerCase().includes("action") || g.toLowerCase().includes("thriller"))
+      );
+    }
+    return true;
+  });
+
+  const currentHero = FEATURED_MOVIES[heroIndex] || FEATURED_MOVIES[0];
+
   return (
     <div className="app">
       {/* ------------------------------------------------------------------- */}
-      {/* GLOBAL NAVBAR                                                       */}
+      {/* GLOBAL NAVBAR (STITCH DESIGN)                                       */}
       {/* ------------------------------------------------------------------- */}
-      <nav className="navbar navbar-dark border-bottom border-secondary px-4 py-3 sticky-top bg-black">
-        <div className="container-fluid d-flex justify-content-between align-items-center">
+      <header className="stitch-navbar px-3 px-md-5 py-3">
+        <div className="container-fluid d-flex justify-content-between align-items-center flex-wrap gap-2">
+          {/* Brand & Main Nav Links */}
           <div className="d-flex align-items-center gap-3">
             <button
-              className="navbar-brand fw-bold fs-3 text-white text-decoration-none btn btn-link p-0"
+              className="navbar-brand btn btn-link p-0"
               onClick={() => {
                 setPortalView("storefront");
                 closeSeatSelection();
               }}
             >
-              IMOVIES<span className="accent">.</span>
+              <svg className="brand-icon" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M18 4l2 4h-3l-2-4h-2l2 4h-3l-2-4H8l2 4H7L5 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4h-4zM8 17H6v-2h2v2zm0-4H6v-2h2v2zm0-4H6V7h2v2zm10 8h-2v-2h2v2zm0-4h-2v-2h2v2zm0-4h-2V7h2v2z" />
+              </svg>
+              <span>IMOVIES</span>
             </button>
 
             {portalView === "storefront" && activeShow && (
-              <button className="btn btn-outline-secondary btn-sm text-light" onClick={closeSeatSelection}>
-                â† Back to Movies
+              <button className="stitch-btn-pill stitch-btn-pill-ghost btn-sm" onClick={closeSeatSelection}>
+                ← Back to Catalog
               </button>
             )}
 
-            {/* Portal Switcher Navigation */}
-            <div className="btn-group btn-group-sm ms-2">
+            {/* Nav Links */}
+            <div className="d-none d-lg-flex align-items-center gap-2 ms-2">
               <button
-                className={`btn ${portalView === "storefront" ? "btn-danger" : "btn-outline-secondary text-secondary"}`}
-                onClick={() => setPortalView("storefront")}
+                className={`stitch-nav-link ${portalView === "storefront" && !activeShow ? "active" : ""}`}
+                onClick={() => {
+                  setPortalView("storefront");
+                  closeSeatSelection();
+                }}
               >
-                Cinema
+                Home
               </button>
               <button
-                className={`btn ${portalView === "admin" ? "btn-danger" : "btn-outline-secondary text-secondary"}`}
-                onClick={() => setPortalView("admin")}
+                className="stitch-nav-link"
+                onClick={() => {
+                  setPortalView("storefront");
+                  closeSeatSelection();
+                  setTimeout(() => {
+                    const el = document.getElementById("now-showing");
+                    if (el) el.scrollIntoView({ behavior: "smooth" });
+                  }, 100);
+                }}
               >
-                Admin Portal {currentUser?.role === "admin" && <span className="badge bg-white text-dark ms-1">â˜…</span>}
+                Movies Catalog
+              </button>
+              <button
+                className="stitch-nav-link"
+                onClick={() => setCinemasModalOpen(true)}
+              >
+                Cinemas
+              </button>
+              <button
+                className={`stitch-nav-link ${portalView === "admin" ? "active" : ""}`}
+                onClick={() => setPortalView(portalView === "admin" ? "storefront" : "admin")}
+              >
+                Admin Dashboard {currentUser?.role === "admin" && <span className="text-warning">★</span>}
               </button>
             </div>
           </div>
 
-          <div className="d-flex align-items-center gap-2">
+          {/* Right Controls: Search Pill, My Bookings, User Auth */}
+          <div className="d-flex align-items-center gap-3">
+            {portalView === "storefront" && !activeShow && (
+              <div className="stitch-search-pill d-none d-md-flex">
+                <svg className="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <circle cx="11" cy="11" r="8" />
+                  <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                </svg>
+                <input
+                  type="text"
+                  placeholder="Search movies by title..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
+            )}
+
             {currentUser ? (
-              <>
+              <div className="d-flex align-items-center gap-2">
                 {portalView === "storefront" && (
-                  <button className="btn btn-outline-light btn-sm" onClick={openMyBookings}>
-                    ðŸŽŸ My Bookings
+                  <button className="stitch-btn-pill stitch-btn-pill-ghost btn-sm" onClick={openMyBookings}>
+                    🎟️ My Bookings
                   </button>
                 )}
-                <span className="text-secondary small d-none d-md-inline ms-2">
-                  <span className={`badge ${currentUser.role === "admin" ? "bg-danger" : "bg-secondary"} me-1`}>
-                    {currentUser.role}
+
+                <div className="d-flex align-items-center gap-2 ms-1">
+                  <span className="stitch-role-badge">
+                    {currentUser.role === "admin" ? "ADMINISTRATOR" : "CIVILIAN USER"}
                   </span>
-                  <strong className="text-white">{currentUser.name}</strong>
-                </span>
-                <button className="btn btn-sm btn-outline-secondary text-secondary ms-2" onClick={handleLogout}>
-                  Logout
-                </button>
-              </>
+                  <span className="d-none d-sm-inline fw-bold text-white small">
+                    {currentUser.name}
+                  </span>
+                  <button className="stitch-btn-pill stitch-btn-pill-ghost btn-sm" onClick={handleLogout} title="Sign Out">
+                    Sign Out
+                  </button>
+                </div>
+              </div>
             ) : (
-              <button className="btn btn-outline-danger btn-sm fw-semibold" onClick={() => setAuthModalOpen(true)}>
+              <button className="stitch-btn-pill stitch-btn-pill-orange btn-sm" onClick={() => setAuthModalOpen(true)}>
                 Sign In
               </button>
             )}
           </div>
         </div>
-      </nav>
+      </header>
+
+      {/* Floating Toast Notification */}
+      {toastMessage && (
+        <div
+          style={{
+            position: "fixed",
+            bottom: "24px",
+            right: "24px",
+            zIndex: 1080,
+            background: "#161b2a",
+            border: "1px solid var(--stitch-orange)",
+            boxShadow: "0 10px 30px rgba(0,0,0,0.8)",
+            color: "#ffffff",
+            padding: "12px 20px",
+            borderRadius: "12px",
+            display: "flex",
+            alignItems: "center",
+            gap: "10px",
+            fontSize: "0.85rem",
+            fontWeight: 700,
+          }}
+        >
+          <span style={{ color: "var(--stitch-orange)" }}>✓</span>
+          <span>{toastMessage}</span>
+          <button
+            onClick={() => setToastMessage(null)}
+            style={{ background: "none", border: "none", color: "#94a3b8", marginLeft: "10px", cursor: "pointer" }}
+          >
+            ✕
+          </button>
+        </div>
+      )}
 
       {/* ------------------------------------------------------------------- */}
-      {/* PORTAL VIEW: ADMIN MANAGEMENT                                       */}
+      {/* PORTAL VIEW: ADMIN MANAGEMENT CONSOLE                               */}
       {/* ------------------------------------------------------------------- */}
       {portalView === "admin" ? (
         !authToken ? (
           /* Case 1: Unauthenticated -> Prompt Admin Login */
           <main className="container py-5 text-center flex-grow-1" style={{ maxWidth: "480px" }}>
-            <div className="p-4 rounded-3 text-start" style={{ background: "#14141e", border: "1px solid rgba(255,255,255,0.12)" }}>
+            <div className="p-4 rounded-4 text-start" style={{ background: "#111420", border: "1px solid var(--stitch-border-light)" }}>
               <div className="text-center mb-4">
-                <span className="fs-1">ðŸ›¡ï¸</span>
+                <span className="fs-1">🛡️</span>
                 <h4 className="fw-bold text-white mt-2">Admin Portal Authentication</h4>
                 <p className="text-secondary small">Sign in with administrative privileges to manage movies, venues, and schedules.</p>
               </div>
@@ -1068,7 +1319,7 @@ function App() {
                     onChange={(e) => setAuthPassword(e.target.value)}
                   />
                 </div>
-                <button type="submit" className="btn btn-danger w-100 fw-bold py-2">
+                <button type="submit" className="stitch-btn-pill stitch-btn-pill-orange w-100 justify-content-center py-2">
                   Sign In to Console
                 </button>
               </form>
@@ -1077,21 +1328,21 @@ function App() {
         ) : currentUser?.role !== "admin" ? (
           /* Case 2: Authenticated as normal customer -> 403 Forbidden Access Denied */
           <main className="container py-5 text-center flex-grow-1" style={{ maxWidth: "560px" }}>
-            <div className="p-5 rounded-3" style={{ background: "#1a1215", border: "1px solid rgba(239,68,68,0.3)" }}>
-              <span className="fs-1 text-danger">â›”</span>
-              <h3 className="fw-bold text-white mt-3 mb-2">403 Forbidden â€” Access Denied</h3>
+            <div className="p-5 rounded-4" style={{ background: "#171216", border: "1px solid rgba(255,85,0,0.3)" }}>
+              <span className="fs-1 text-danger">⛔</span>
+              <h3 className="fw-bold text-white mt-3 mb-2">403 Forbidden — Access Denied</h3>
               <p className="text-secondary">
                 You are currently signed in as <strong>{currentUser.email}</strong> with standard customer privileges (
                 <code>role: 'user'</code>).
               </p>
               <div className="alert alert-warning small text-start my-3" style={{ background: "#251c14", borderColor: "#78350f", color: "#fef3c7" }}>
-                â„¹ <em>Administrative clearance is required to view platform metrics, manage theatrical schedules, and access customer bookings.</em>
+                ℹ <em>Administrative clearance is required to view platform metrics, manage theatrical schedules, and access customer bookings.</em>
               </div>
               <div className="d-flex justify-content-center gap-2 mt-4">
-                <button className="btn btn-danger px-4" onClick={() => setPortalView("storefront")}>
+                <button className="stitch-btn-pill stitch-btn-pill-orange px-4" onClick={() => setPortalView("storefront")}>
                   Return to Cinema Storefront
                 </button>
-                <button className="btn btn-outline-secondary" onClick={handleLogout}>
+                <button className="stitch-btn-pill stitch-btn-pill-ghost" onClick={handleLogout}>
                   Switch Account
                 </button>
               </div>
@@ -1113,31 +1364,31 @@ function App() {
                   className={`admin-nav-btn ${adminTab === "overview" ? "active" : ""}`}
                   onClick={() => setAdminTab("overview")}
                 >
-                  ðŸ“Š Overview
+                  📊 Overview
                 </button>
                 <button
                   className={`admin-nav-btn ${adminTab === "movies" ? "active" : ""}`}
                   onClick={() => setAdminTab("movies")}
                 >
-                  ðŸŽ¬ Movies
+                  🎬 Movies
                 </button>
                 <button
                   className={`admin-nav-btn ${adminTab === "theatres" ? "active" : ""}`}
                   onClick={() => setAdminTab("theatres")}
                 >
-                  ðŸ›ï¸ Theatres & Screens
+                  🏛️ Theatres & Screens
                 </button>
                 <button
                   className={`admin-nav-btn ${adminTab === "shows" ? "active" : ""}`}
                   onClick={() => setAdminTab("shows")}
                 >
-                  ðŸ•’ Showtimes
+                  🕒 Showtimes
                 </button>
                 <button
                   className={`admin-nav-btn ${adminTab === "bookings" ? "active" : ""}`}
                   onClick={() => setAdminTab("bookings")}
                 >
-                  ðŸŽŸï¸ Bookings
+                  🎟️ Bookings
                 </button>
               </div>
             </div>
@@ -1148,116 +1399,42 @@ function App() {
                 <div className="d-flex justify-content-between align-items-center mb-3">
                   <h5 className="fw-bold text-white mb-0">System Performance & Key Indicators</h5>
                   <button className="btn btn-outline-danger btn-sm" onClick={loadAdminOverview} disabled={overviewLoading}>
-                    {overviewLoading ? "Refreshing..." : "â†» Refresh Metrics"}
+                    {overviewLoading ? "Refreshing..." : "↻ Refresh Metrics"}
                   </button>
                 </div>
 
-                {overviewLoading && !adminOverview ? (
-                  <div className="text-center py-5">
-                    <div className="spinner-border text-danger" role="status" />
-                    <p className="text-secondary mt-2">Computing live database aggregations...</p>
+                <div className="row g-4 mb-4">
+                  <div className="col-12 col-sm-6 col-lg-3">
+                    <div className="admin-metric-card">
+                      <span className="text-secondary small fw-bold">TOTAL MOVIES</span>
+                      <div className="admin-metric-value">{adminOverview?.counts?.movies ?? "—"}</div>
+                      <span className="text-success small">Theatrical Releases</span>
+                    </div>
                   </div>
-                ) : (
-                  <>
-                    <div className="row g-3 mb-4">
-                      <div className="col-12 col-sm-6 col-lg-2">
-                        <div className="admin-metric-card">
-                          <span className="text-secondary small text-uppercase">Movies Catalog</span>
-                          <div className="admin-metric-value">{adminOverview?.metrics.movies.total ?? 0}</div>
-                          <span className="text-success small">{adminOverview?.metrics.movies.active ?? 0} Active</span>
-                        </div>
-                      </div>
-                      <div className="col-12 col-sm-6 col-lg-2">
-                        <div className="admin-metric-card">
-                          <span className="text-secondary small text-uppercase">Theatres</span>
-                          <div className="admin-metric-value">{adminOverview?.metrics.theatres.total ?? 0}</div>
-                          <span className="text-success small">{adminOverview?.metrics.theatres.active ?? 0} Active</span>
-                        </div>
-                      </div>
-                      <div className="col-12 col-sm-6 col-lg-2">
-                        <div className="admin-metric-card">
-                          <span className="text-secondary small text-uppercase">Screens</span>
-                          <div className="admin-metric-value">{adminOverview?.metrics.screens.total ?? 0}</div>
-                          <span className="text-secondary small">Auditoriums</span>
-                        </div>
-                      </div>
-                      <div className="col-12 col-sm-6 col-lg-2">
-                        <div className="admin-metric-card">
-                          <span className="text-secondary small text-uppercase">Shows</span>
-                          <div className="admin-metric-value">{adminOverview?.metrics.shows.total ?? 0}</div>
-                          <span className="text-success small">{adminOverview?.metrics.shows.scheduled ?? 0} Scheduled</span>
-                        </div>
-                      </div>
-                      <div className="col-12 col-sm-6 col-lg-2">
-                        <div className="admin-metric-card">
-                          <span className="text-secondary small text-uppercase">Bookings</span>
-                          <div className="admin-metric-value">{adminOverview?.metrics.bookings.total ?? 0}</div>
-                          <span className="text-success small">{adminOverview?.metrics.bookings.confirmed ?? 0} Confirmed</span>
-                        </div>
-                      </div>
-                      <div className="col-12 col-sm-6 col-lg-2">
-                        <div className="admin-metric-card">
-                          <span className="text-secondary small text-uppercase">Revenue</span>
-                          <div className="admin-metric-value accent">${adminOverview?.metrics.revenue ?? 0}</div>
-                          <span className="text-secondary small">Simulation Total</span>
-                        </div>
-                      </div>
+                  <div className="col-12 col-sm-6 col-lg-3">
+                    <div className="admin-metric-card">
+                      <span className="text-secondary small fw-bold">ACTIVE THEATRES</span>
+                      <div className="admin-metric-value">{adminOverview?.counts?.theatres ?? "—"}</div>
+                      <span className="text-info small">{adminOverview?.counts?.screens ?? 0} Screens Configured</span>
                     </div>
-
-                    <h5 className="fw-bold text-white mb-3">Recent Customer Activity</h5>
-                    <div className="table-responsive rounded-3" style={{ background: "#14141e", border: "1px solid rgba(255,255,255,0.08)" }}>
-                      <table className="admin-table">
-                        <thead>
-                          <tr>
-                            <th>Reference</th>
-                            <th>Customer</th>
-                            <th>Movie</th>
-                            <th>Venue</th>
-                            <th>Seats</th>
-                            <th>Amount</th>
-                            <th>Status</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {adminOverview?.recentBookings?.length === 0 ? (
-                            <tr>
-                              <td colSpan="7" className="text-center py-4 text-secondary">
-                                No customer bookings recorded yet.
-                              </td>
-                            </tr>
-                          ) : (
-                            adminOverview?.recentBookings?.map((b) => (
-                              <tr key={b._id}>
-                                <td className="fw-bold accent">{b.bookingReference}</td>
-                                <td>
-                                  <div>{b.user?.name || "Customer"}</div>
-                                  <span className="text-secondary small">{b.user?.email}</span>
-                                </td>
-                                <td>{b.show?.movie?.title || "Movie"}</td>
-                                <td>
-                                  {b.show?.theatre?.name} ({b.show?.theatre?.city})
-                                </td>
-                                <td>
-                                  {b.seats?.map((s) => (
-                                    <span key={s.seatNumber} className="badge bg-danger me-1">
-                                      {s.seatNumber}
-                                    </span>
-                                  ))}
-                                </td>
-                                <td className="fw-bold">${b.totalAmount}</td>
-                                <td>
-                                  <span className={`badge ${b.bookingStatus === "confirmed" ? "bg-success" : "bg-secondary"}`}>
-                                    {b.bookingStatus}
-                                  </span>
-                                </td>
-                              </tr>
-                            ))
-                          )}
-                        </tbody>
-                      </table>
+                  </div>
+                  <div className="col-12 col-sm-6 col-lg-3">
+                    <div className="admin-metric-card">
+                      <span className="text-secondary small fw-bold">SCHEDULED SHOWS</span>
+                      <div className="admin-metric-value">{adminOverview?.counts?.upcomingShows ?? "—"}</div>
+                      <span className="text-warning small">Upcoming Sessions</span>
                     </div>
-                  </>
-                )}
+                  </div>
+                  <div className="col-12 col-sm-6 col-lg-3">
+                    <div className="admin-metric-card">
+                      <span className="text-secondary small fw-bold">TOTAL REVENUE (SIM)</span>
+                      <div className="admin-metric-value text-success">
+                        ${adminOverview?.revenue?.totalRevenue ?? 0}
+                      </div>
+                      <span className="text-secondary small">{adminOverview?.counts?.confirmedBookings ?? 0} Confirmed Tickets</span>
+                    </div>
+                  </div>
+                </div>
               </div>
             )}
 
@@ -1266,7 +1443,7 @@ function App() {
               <div>
                 <div className="d-flex justify-content-between align-items-center mb-3">
                   <h5 className="fw-bold text-white mb-0">Movie Catalog Management</h5>
-                  <button className="btn btn-danger btn-sm fw-semibold" onClick={handleOpenAddMovie}>
+                  <button className="stitch-btn-pill stitch-btn-pill-orange btn-sm fw-semibold" onClick={handleOpenAddMovie}>
                     + Add New Movie
                   </button>
                 </div>
@@ -1274,7 +1451,7 @@ function App() {
                 {adminMoviesLoading ? (
                   <div className="text-center py-4 text-secondary">Loading movies...</div>
                 ) : (
-                  <div className="table-responsive rounded-3" style={{ background: "#14141e", border: "1px solid rgba(255,255,255,0.08)" }}>
+                  <div className="table-responsive rounded-3" style={{ background: "#111420", border: "1px solid var(--stitch-border)" }}>
                     <table className="admin-table">
                       <thead>
                         <tr>
@@ -1295,7 +1472,7 @@ function App() {
                                 {m.posterUrl ? (
                                   <img src={m.posterUrl} alt="" style={{ width: "32px", height: "44px", objectFit: "cover", borderRadius: "4px" }} />
                                 ) : (
-                                  <div style={{ width: "32px", height: "44px", background: "#232334", borderRadius: "4px", display: "flex", alignItems: "center", justifyContent: "center" }}>ðŸŽ¬</div>
+                                  <div style={{ width: "32px", height: "44px", background: "#232334", borderRadius: "4px", display: "flex", alignItems: "center", justifyContent: "center" }}>🎬</div>
                                 )}
                                 <div>
                                   <div className="fw-bold text-white">{m.title}</div>
@@ -1347,14 +1524,14 @@ function App() {
               <div>
                 <div className="d-flex justify-content-between align-items-center mb-3">
                   <h5 className="fw-bold text-white mb-0">Venues & Screen Management</h5>
-                  <button className="btn btn-danger btn-sm fw-semibold" onClick={handleOpenAddTheatre}>
+                  <button className="stitch-btn-pill stitch-btn-pill-orange btn-sm fw-semibold" onClick={handleOpenAddTheatre}>
                     + Add New Theatre
                   </button>
                 </div>
 
                 <div className="row g-4">
                   <div className="col-12 col-lg-7">
-                    <div className="table-responsive rounded-3" style={{ background: "#14141e", border: "1px solid rgba(255,255,255,0.08)" }}>
+                    <div className="table-responsive rounded-3" style={{ background: "#111420", border: "1px solid var(--stitch-border)" }}>
                       <table className="admin-table">
                         <thead>
                           <tr>
@@ -1407,7 +1584,7 @@ function App() {
 
                   {/* Screens Panel */}
                   <div className="col-12 col-lg-5">
-                    <div className="p-3 rounded-3" style={{ background: "#14141e", border: "1px solid rgba(255,255,255,0.08)" }}>
+                    <div className="p-3 rounded-3" style={{ background: "#111420", border: "1px solid var(--stitch-border)" }}>
                       {selectedTheatreForScreens ? (
                         <>
                           <div className="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom border-secondary">
@@ -1415,31 +1592,29 @@ function App() {
                               <h6 className="fw-bold text-white mb-0">{selectedTheatreForScreens.name} Screens</h6>
                               <span className="text-secondary small">Venue auditoriums</span>
                             </div>
-                            <button className="btn btn-danger btn-sm" onClick={handleOpenAddScreen}>
+                            <button className="stitch-btn-pill stitch-btn-pill-orange btn-sm" onClick={handleOpenAddScreen}>
                               + Add Screen
                             </button>
                           </div>
 
                           {screensLoading ? (
-                            <div className="text-center py-3 text-secondary">Loading screens...</div>
+                            <div className="text-center py-3 text-secondary">Loading auditoriums...</div>
                           ) : theatreScreens.length === 0 ? (
-                            <div className="text-center py-4 text-secondary small">
-                              No screens created for this venue yet. Click "+ Add Screen".
-                            </div>
+                            <p className="text-secondary small">No screens configured for this venue yet.</p>
                           ) : (
                             <div className="d-flex flex-column gap-2">
                               {theatreScreens.map((s) => (
                                 <div
                                   key={s._id}
-                                  className="d-flex justify-content-between align-items-center p-2 rounded-2"
-                                  style={{ background: "#1c1c2b", border: "1px solid rgba(255,255,255,0.05)" }}
+                                  className="d-flex justify-content-between align-items-center p-2 rounded"
+                                  style={{ background: "#181c2b" }}
                                 >
                                   <div>
                                     <strong className="text-white">{s.name}</strong>
-                                    <span className="badge bg-secondary ms-2">{s.screenType}</span>
-                                    <div className="text-secondary small">Capacity: {s.seatingCapacity} seats</div>
+                                    <span className="badge bg-danger ms-2">{s.screenType}</span>
+                                    <div className="text-secondary small">{s.seatingCapacity} seats capacity</div>
                                   </div>
-                                  <button className="btn btn-outline-danger btn-sm" onClick={() => handleDeleteScreen(s._id)}>
+                                  <button className="btn btn-sm btn-outline-danger" onClick={() => handleDeleteScreen(s._id)}>
                                     Delete
                                   </button>
                                 </div>
@@ -1448,8 +1623,8 @@ function App() {
                           )}
                         </>
                       ) : (
-                        <div className="text-center py-5 text-secondary small">
-                          Select a theatre on the left to manage its screen auditoriums.
+                        <div className="text-center py-4 text-secondary">
+                          <p>Select a theatre on the left to inspect and configure auditoriums.</p>
                         </div>
                       )}
                     </div>
@@ -1462,24 +1637,23 @@ function App() {
             {adminTab === "shows" && (
               <div>
                 <div className="d-flex justify-content-between align-items-center mb-3">
-                  <h5 className="fw-bold text-white mb-0">Showtime Scheduling</h5>
-                  <button className="btn btn-danger btn-sm fw-semibold" onClick={handleOpenAddShow}>
-                    + Schedule New Showtime
+                  <h5 className="fw-bold text-white mb-0">Theatrical Screening Schedules</h5>
+                  <button className="stitch-btn-pill stitch-btn-pill-orange btn-sm fw-semibold" onClick={handleOpenAddShow}>
+                    + Schedule Showtime
                   </button>
                 </div>
 
                 {showsLoading ? (
                   <div className="text-center py-4 text-secondary">Loading show schedules...</div>
                 ) : (
-                  <div className="table-responsive rounded-3" style={{ background: "#14141e", border: "1px solid rgba(255,255,255,0.08)" }}>
+                  <div className="table-responsive rounded-3" style={{ background: "#111420", border: "1px solid var(--stitch-border)" }}>
                     <table className="admin-table">
                       <thead>
                         <tr>
                           <th>Movie</th>
-                          <th>Venue</th>
-                          <th>Screen</th>
-                          <th>Showtime</th>
-                          <th>Available Seats</th>
+                          <th>Theatre & Screen</th>
+                          <th>Screening Time</th>
+                          <th>Pricing Tiers</th>
                           <th>Status</th>
                           <th>Actions</th>
                         </tr>
@@ -1488,22 +1662,25 @@ function App() {
                         {adminShows.map((s) => (
                           <tr key={s._id}>
                             <td className="fw-bold text-white">{s.movie?.title}</td>
-                            <td>{s.theatre?.name} ({s.theatre?.city})</td>
-                            <td>{s.screen?.name} ({s.screen?.screenType})</td>
+                            <td>
+                              <div>{s.theatre?.name}</div>
+                              <span className="text-secondary small">{s.screen?.name} ({s.screen?.screenType})</span>
+                            </td>
                             <td>
                               <div>{new Date(s.startTime).toLocaleDateString()}</div>
                               <span className="text-secondary small">
-                                {new Date(s.startTime).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} -{" "}
-                                {new Date(s.endTime).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                                {new Date(s.startTime).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                               </span>
                             </td>
                             <td>
-                              <span className="badge bg-dark border border-secondary">
-                                {s.seatsAvailableCount ?? s.seats?.filter((x) => x.status === "available").length ?? 0} left
-                              </span>
+                              {s.pricing?.map((p) => (
+                                <span key={p.tier} className="badge bg-dark border border-secondary me-1">
+                                  {p.tier}: ${p.price}
+                                </span>
+                              ))}
                             </td>
                             <td>
-                              <span className={`badge ${s.status === "scheduled" ? "bg-success" : s.status === "cancelled" ? "bg-secondary" : "bg-dark"}`}>
+                              <span className={`badge ${s.status === "scheduled" ? "bg-success" : "bg-danger"}`}>
                                 {s.status}
                               </span>
                             </td>
@@ -1523,16 +1700,17 @@ function App() {
               </div>
             )}
 
-            {/* TAB 5: PLATFORM BOOKINGS */}
+            {/* TAB 5: BOOKINGS */}
             {adminTab === "bookings" && (
               <div>
-                <div className="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
-                  <h5 className="fw-bold text-white mb-0">Platform Reservations</h5>
+                <div className="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                  <h5 className="fw-bold text-white mb-0">Customer Reservation Records</h5>
                   <div className="d-flex gap-2">
                     <input
                       type="text"
+                      placeholder="Search ref or customer..."
                       className="form-control form-control-sm custom-input"
-                      placeholder="Search booking ref..."
+                      style={{ width: "200px" }}
                       value={bookingSearch}
                       onChange={(e) => setBookingSearch(e.target.value)}
                     />
@@ -1551,7 +1729,7 @@ function App() {
                 {adminBookingsLoading ? (
                   <div className="text-center py-4 text-secondary">Loading bookings...</div>
                 ) : (
-                  <div className="table-responsive rounded-3" style={{ background: "#14141e", border: "1px solid rgba(255,255,255,0.08)" }}>
+                  <div className="table-responsive rounded-3" style={{ background: "#111420", border: "1px solid var(--stitch-border)" }}>
                     <table className="admin-table">
                       <thead>
                         <tr>
@@ -1620,15 +1798,15 @@ function App() {
             <div className="d-flex flex-wrap justify-content-between align-items-center pb-3 mb-4 border-bottom border-secondary">
               <div>
                 <div className="d-flex align-items-center gap-2 mb-1">
-                  <span className="badge bg-danger">{activeShow.screen?.screenType || "2D"}</span>
+                  <span className="card-format-badge position-static">{activeShow.screen?.screenType || "IMAX Laser"}</span>
                   <span className={`realtime-badge ${socketConnected ? "realtime-badge-connected" : "realtime-badge-polling"}`}>
                     {socketConnected ? "● Live Availability" : "○ Polling Mode"}
                   </span>
                 </div>
                 <h3 className="fw-bold text-white mb-0">{activeShow.movie?.title}</h3>
                 <p className="text-secondary small mb-0 mt-1">
-                  {activeShow.theatre?.name} ({activeShow.theatre?.city}) Â·{" "}
-                  {activeShow.screen?.name || `Screen ${activeShow.screen?.screenNumber}`} Â·{" "}
+                  {activeShow.theatre?.name} ({activeShow.theatre?.city}) ·{" "}
+                  {activeShow.screen?.name || `Screen ${activeShow.screen?.screenNumber}`} ·{" "}
                   {new Date(activeShow.startTime).toLocaleDateString(undefined, {
                     weekday: "short",
                     month: "short",
@@ -1655,7 +1833,7 @@ function App() {
             {showLoading && (
               <div className="text-center py-5">
                 <div className="spinner-border text-danger" role="status" />
-                <p className="text-secondary mt-2">Loading screen layout...</p>
+                <p className="text-secondary mt-2">Loading auditorium seating layout...</p>
               </div>
             )}
 
@@ -1676,17 +1854,17 @@ function App() {
                     {String((activeHold.remainingSeconds || 0) % 60).padStart(2, "0")}
                   </span>
                   <span className="text-warning fw-semibold">
-                    Seats {selectedSeats.join(", ")} held exclusively for you!
+                    Seats {selectedSeats.join(", ")} reserved exclusively in your session!
                   </span>
                 </div>
-                <button className="btn btn-sm btn-outline-warning" onClick={handleReleaseHold}>
+                <button className="stitch-btn-pill stitch-btn-pill-ghost btn-sm" onClick={handleReleaseHold}>
                   Release Hold
                 </button>
               </div>
             )}
 
             {!showLoading && !showError && (
-              <div className="p-4 rounded-3 text-center" style={{ background: "#14141e", border: "1px solid rgba(255,255,255,0.08)" }}>
+              <div className="p-4 rounded-4 text-center" style={{ background: "#111420", border: "1px solid var(--stitch-border)" }}>
                 <div className="screen-visual" />
 
                 <div className="seat-grid">
@@ -1699,18 +1877,13 @@ function App() {
                         const isHeldByOther = seat.status === "reserved" && !isHeldByMe;
                         const isBooked = seat.status === "booked";
 
-                        const tierClass =
-                          seat.tier === "vip"
-                            ? "seat-vip"
-                            : seat.tier === "premium"
-                            ? "seat-premium"
-                            : "seat-standard";
-
-                        let statusClass = tierClass;
+                        let statusClass = "seat-standard";
+                        if (seat.tier === "premium") statusClass = "seat-premium";
+                        if (seat.tier === "vip") statusClass = "seat-vip";
+                        if (isSelected) statusClass = "seat-selected";
+                        if (isHeldByMe) statusClass = "seat-held-by-me";
+                        if (isHeldByOther) statusClass = "seat-held-by-other";
                         if (isBooked) statusClass = "seat-booked";
-                        else if (isHeldByMe) statusClass = "seat-held-by-me";
-                        else if (isHeldByOther) statusClass = "seat-held-by-other";
-                        else if (isSelected) statusClass = "seat-selected";
 
                         const seatTitle = isBooked
                           ? `${seat.seatNumber} - Booked`
@@ -1733,70 +1906,67 @@ function App() {
                           </button>
                         );
                       })}
-                      <span className="row-label">{row}</span>
                     </div>
                   ))}
                 </div>
 
-                <div className="d-flex flex-wrap justify-content-center gap-4 text-secondary small pt-3 border-top border-secondary border-opacity-25">
+                {/* Legend */}
+                <div className="d-flex justify-content-center align-items-center gap-3 flex-wrap small text-secondary border-top border-secondary pt-3 mt-4">
                   <div>
-                    <span className="legend-dot seat-standard" /> Standard ($
-                    {activeShow.pricing?.find((p) => p.tier === "standard")?.price || 10})
+                    <span className="legend-dot" style={{ background: "#181c2b", border: "1px solid rgba(255,255,255,0.2)" }} />
+                    Standard
                   </div>
                   <div>
-                    <span className="legend-dot seat-premium" /> Premium ($
-                    {activeShow.pricing?.find((p) => p.tier === "premium")?.price || 15})
+                    <span className="legend-dot" style={{ background: "#251b3d", border: "1px solid #8b5cf6" }} />
+                    Premium
                   </div>
                   <div>
-                    <span className="legend-dot seat-vip" /> VIP ($
-                    {activeShow.pricing?.find((p) => p.tier === "vip")?.price || 20})
+                    <span className="legend-dot" style={{ background: "#36220e", border: "1px solid #f59e0b" }} />
+                    VIP Recliner
                   </div>
                   <div>
-                    <span className="legend-dot seat-selected" /> Selected
+                    <span className="legend-dot" style={{ background: "var(--stitch-orange)" }} />
+                    Selected
                   </div>
                   <div>
-                    <span className="legend-dot seat-held-by-me" /> Held by You
+                    <span className="legend-dot" style={{ background: "#7c2d12" }} />
+                    Held by You
                   </div>
                   <div>
-                    <span className="legend-dot seat-held-by-other" /> Held by Others
+                    <span className="legend-dot" style={{ background: "#2d1e10", border: "1px solid #b45309" }} />
+                    Held by Other
                   </div>
                   <div>
-                    <span className="legend-dot seat-booked" /> Booked
+                    <span className="legend-dot" style={{ background: "#11141c" }} />
+                    Booked
                   </div>
                 </div>
 
-                <div
-                  className="mt-4 p-3 rounded-3 d-flex flex-wrap justify-content-between align-items-center"
-                  style={{ background: "#1c1c2b", border: "1px solid rgba(255,255,255,0.12)" }}
-                >
+                {/* Bottom Checkout Action Tray */}
+                <div className="mt-4 pt-3 border-top border-secondary d-flex justify-content-between align-items-center flex-wrap gap-2">
                   <div className="text-start">
-                    <div className="small text-secondary">Selected Seats:</div>
-                    <div className="d-flex flex-wrap gap-1 mt-1">
-                      {selectedSeats.length === 0 ? (
-                        <span className="text-secondary small fst-italic">None selected (Click available seats above)</span>
-                      ) : (
-                        selectedSeats.map((num) => (
-                          <span key={num} className="badge bg-danger text-white">
-                            {num}
-                          </span>
-                        ))
-                      )}
-                    </div>
+                    <span className="text-secondary small d-block">Selected Seats:</span>
+                    <strong className="text-white">
+                      {selectedSeats.length > 0 ? selectedSeats.join(", ") : "None"}
+                    </strong>
+                    {selectedSeats.length > 0 && (
+                      <span className="text-secondary ms-2 small">
+                        ({selectedSeats.length} seats · Total: <strong className="accent">${calculatedTotal}</strong>)
+                      </span>
+                    )}
                   </div>
 
-                  <div className="d-flex align-items-center gap-3 mt-3 mt-sm-0">
-                    <div className="text-end">
-                      <div className="small text-secondary">Authoritative Total:</div>
-                      <div className="fs-4 fw-bold accent">${calculatedTotal}</div>
-                    </div>
-
+                  <div className="d-flex gap-2">
+                    <button className="stitch-btn-pill stitch-btn-pill-ghost" onClick={closeSeatSelection}>
+                      Cancel
+                    </button>
                     <button
-                      className="btn btn-danger btn-lg px-4 fw-semibold"
+                      className="stitch-btn-pill stitch-btn-pill-orange"
                       disabled={selectedSeats.length === 0 || holdLoading}
                       onClick={handleProceedToReview}
                     >
                       {holdLoading
-                        ? "Holding Seats..."
+                        ? "Locking Seats..."
                         : activeHold
                         ? `Proceed to Review (${selectedSeats.length})`
                         : `Hold Seats & Review (${selectedSeats.length})`}
@@ -1807,24 +1977,241 @@ function App() {
             )}
           </main>
         ) : (
-          /* MOVIE CATALOG BROWSER */
+          /* ----------------------------------------------------------------- */
+          /* STITCH DESIGN: MOVIE DISCOVERY SHOWCASE                           */
+          /* ----------------------------------------------------------------- */
           <>
-            <header className="hero container text-center">
-              <p className="accent fw-bold text-uppercase tracking-wider small mb-2">
-                Theatrical releases & live seat reservation
-              </p>
-              <h1 className="display-4 fw-black">
-                EXPLORE MOVIES.
-                <br />
-                <span className="accent">PICK YOUR EXACT SEATS.</span>
-              </h1>
-              <p className="lead text-secondary mt-3 mx-auto" style={{ maxWidth: "600px" }}>
-                Select a title to view schedules and open the real-time cinema seating map.
-              </p>
-            </header>
+            {/* HERO SHOWCASE SECTION */}
+            <section className="stitch-hero">
+              <div className="stitch-hero-bg" />
+              <div className="stitch-hero-stars" />
 
-            <section className="container mb-5 flex-grow-1">
-              <div className="p-3 rounded-3 mb-4" style={{ background: "#14141e", border: "1px solid rgba(255,255,255,0.08)" }}>
+              {/* Spacecraft Silhouette Graphic */}
+              <div className="stitch-hero-spacecraft">
+                <svg viewBox="0 0 600 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path
+                    d="M120 200 L240 140 L440 170 L520 200 L440 230 L240 260 Z"
+                    fill="#181e2e"
+                    stroke="rgba(255, 85, 0, 0.4)"
+                    strokeWidth="2"
+                  />
+                  <polygon points="260,170 380,185 380,215 260,230" fill="#0d111d" stroke="rgba(255,255,255,0.1)" />
+                  <circle cx="480" cy="200" r="14" fill="#ff5500" opacity="0.8" filter="blur(4px)" />
+                  <path d="M220 190 L160 200 L220 210" stroke="#ffaa00" strokeWidth="3" />
+                  <line x1="300" y1="165" x2="320" y2="140" stroke="rgba(255,85,0,0.5)" strokeWidth="2" />
+                  <line x1="300" y1="235" x2="320" y2="260" stroke="rgba(255,85,0,0.5)" strokeWidth="2" />
+                </svg>
+              </div>
+
+              <div className="container stitch-hero-content">
+                <div className="row">
+                  <div className="col-12 col-lg-8">
+                    {/* Eyebrow badge */}
+                    <div className="hero-eyebrow">
+                      <span className="dot" />
+                      <span>{currentHero.tag}</span>
+                    </div>
+
+                    {/* Headline */}
+                    <h1 className="hero-title">
+                      {currentHero.headlinePart1}
+                      <span className="title-accent">{currentHero.headlinePart2}</span>
+                    </h1>
+
+                    {/* Meta row */}
+                    <div className="hero-meta-row">
+                      <span className="hero-tag">{currentHero.rating}</span>
+                      <span className="hero-tag">{currentHero.genreText}</span>
+                      <span className="hero-tag">{currentHero.durationText}</span>
+                      <span className="hero-rating-tag">{currentHero.scoreText}</span>
+                      <span className="hero-tag" style={{ borderColor: "rgba(255,85,0,0.4)", color: "#ff8833" }}>
+                        {currentHero.audioTag}
+                      </span>
+                      <span className="hero-tag" style={{ borderColor: "rgba(6,182,212,0.4)", color: "#67e8f9" }}>
+                        {currentHero.visualTag}
+                      </span>
+                    </div>
+
+                    {/* Synopsis */}
+                    <p className="hero-synopsis">{currentHero.synopsis}</p>
+
+                    {/* CTAs */}
+                    <div className="hero-cta-group">
+                      <button
+                        className="btn-hero-primary"
+                        onClick={() => handleHeroBookAction(currentHero)}
+                      >
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M22 10V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v4a3 3 0 0 1 0 6v4a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-4a3 3 0 0 1 0-6zm-2-1.46c-1.19.69-2 1.99-2 3.46s.81 2.77 2 3.46V18H4v-2.54c1.19-.69 2-1.99 2-3.46 0-1.48-.8-2.77-1.99-3.46L4 6h16v2.54z" />
+                        </svg>
+                        <span>BOOK TICKETS →</span>
+                      </button>
+
+                      <button
+                        className="btn-hero-secondary"
+                        onClick={() => {
+                          const matched = movies[0];
+                          if (matched) openMovieDetails(matched);
+                        }}
+                      >
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z" />
+                        </svg>
+                        <span>View Details & Trailer</span>
+                      </button>
+                    </div>
+
+                    {/* Carousel Dots */}
+                    <div className="stitch-hero-dots">
+                      {FEATURED_MOVIES.map((_, idx) => (
+                        <button
+                          key={idx}
+                          className={`stitch-hero-dot ${idx === heroIndex ? "active" : ""}`}
+                          onClick={() => setHeroIndex(idx)}
+                          aria-label={`Showcase slide ${idx + 1}`}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Floating "Up Next" mini-card */}
+                <div
+                  className="stitch-up-next-card"
+                  onClick={() => setHeroIndex((prev) => (prev + 1) % FEATURED_MOVIES.length)}
+                  title="Click to view next upcoming presentation"
+                >
+                  <div className="stitch-up-next-thumb d-flex align-items-center justify-content-center">
+                    <span style={{ fontSize: "1.4rem" }}>🎬</span>
+                  </div>
+                  <div>
+                    <div className="stitch-up-next-tag">{currentHero.upNextFormat}</div>
+                    <div className="stitch-up-next-title">{currentHero.upNextTitle}</div>
+                    <div className="stitch-up-next-sub">{currentHero.upNextSub}</div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            {/* QUICK DISCOVERY / SHOWTIME FINDER FLOATING BAR */}
+            <div className="container">
+              <div className="stitch-discovery-bar">
+                <div className="row g-2 align-items-center">
+                  {/* Select Cinema */}
+                  <div className="col-12 col-md-6 col-lg-3">
+                    <div className="discovery-field-group">
+                      <svg className="discovery-field-icon" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
+                      </svg>
+                      <div className="discovery-field-content">
+                        <span className="discovery-field-label">SELECT CINEMA / LOCATION</span>
+                        <select
+                          className="discovery-field-select"
+                          value={discoveryCinema}
+                          onChange={(e) => setDiscoveryCinema(e.target.value)}
+                        >
+                          {adminTheatres.length > 0 ? (
+                            adminTheatres.map((t) => (
+                              <option key={t._id} value={t.name}>
+                                {t.name} ({t.city})
+                              </option>
+                            ))
+                          ) : (
+                            <option value="Neo Metropolitan — Grand IMAX">
+                              Neo Metropolitan — Grand IMAX
+                            </option>
+                          )}
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Show Date */}
+                  <div className="col-12 col-md-6 col-lg-3">
+                    <div className="discovery-field-group">
+                      <svg className="discovery-field-icon" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z" />
+                      </svg>
+                      <div className="discovery-field-content">
+                        <span className="discovery-field-label">SHOW DATE</span>
+                        <select
+                          className="discovery-field-select"
+                          value={discoveryDate}
+                          onChange={(e) => setDiscoveryDate(e.target.value)}
+                        >
+                          <option value="Today, Oct 24 (Evening)">Today, Oct 24 (Evening)</option>
+                          <option value="Tomorrow, Oct 25">Tomorrow, Oct 25</option>
+                          <option value="Saturday, Oct 26">Saturday, Oct 26 (Weekend Prime)</option>
+                          <option value="Sunday, Oct 27">Sunday, Oct 27</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Format / Auditorium */}
+                  <div className="col-12 col-md-6 col-lg-3">
+                    <div className="discovery-field-group">
+                      <svg className="discovery-field-icon" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H8V4h12v12z" />
+                      </svg>
+                      <div className="discovery-field-content">
+                        <span className="discovery-field-label">PREMIUM FORMAT</span>
+                        <select
+                          className="discovery-field-select"
+                          value={discoveryFormat}
+                          onChange={(e) => setDiscoveryFormat(e.target.value)}
+                        >
+                          <option value="All Formats">All Premium Formats</option>
+                          <option value="IMAX Laser 3D">IMAX Laser 3D</option>
+                          <option value="Dolby Cinema">Dolby Cinema Atmos</option>
+                          <option value="4DX Motion">4DX Dynamic Motion</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Action Button */}
+                  <div className="col-12 col-md-6 col-lg-3">
+                    <button className="btn-stitch-find" onClick={handleFindShowtimesClick}>
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                        <circle cx="11" cy="11" r="8" />
+                        <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                      </svg>
+                      <span>FIND SHOWTIMES</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* NOW SHOWING IN THEATERS SECTION */}
+            <section id="now-showing" className="container mb-5 flex-grow-1">
+              {/* Section Header with Tabs */}
+              <div className="d-flex flex-wrap justify-content-between align-items-end mb-4 gap-3">
+                <div>
+                  <div className="stitch-section-tag">
+                    <span>●</span>
+                    <span>TICKETS AVAILABLE</span>
+                  </div>
+                  <h2 className="stitch-section-title">NOW SHOWING IN THEATERS</h2>
+                </div>
+
+                {/* Format Pills */}
+                <div className="stitch-tabs-group">
+                  {FORMAT_TABS.map((tab) => (
+                    <button
+                      key={tab}
+                      className={`stitch-tab-pill ${selectedFormat === tab ? "active" : ""}`}
+                      onClick={() => setSelectedFormat(tab)}
+                    >
+                      {tab}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Filter Controls Toolbar */}
+              <div className="p-3 rounded-4 mb-4" style={{ background: "#111420", border: "1px solid var(--stitch-border)" }}>
                 <div className="row g-3 align-items-center">
                   <div className="col-12 col-md-5">
                     <input
@@ -1874,10 +2261,11 @@ function App() {
                 </div>
               </div>
 
+              {/* Loading & Error States */}
               {loading && (
                 <div className="text-center py-5">
-                  <div className="spinner-border text-danger" role="status" />
-                  <p className="text-secondary mt-3">Connecting to movie catalog...</p>
+                  <div className="spinner-border" style={{ color: "var(--stitch-orange)" }} role="status" />
+                  <p className="text-secondary mt-3">Connecting to digital movie catalog...</p>
                 </div>
               )}
 
@@ -1886,78 +2274,280 @@ function App() {
                   <div>
                     <strong>Error:</strong> {error}
                   </div>
-                  <button className="btn btn-sm btn-outline-danger" onClick={loadMovies}>
+                  <button className="stitch-btn-pill stitch-btn-pill-orange btn-sm" onClick={loadMovies}>
                     Retry
                   </button>
                 </div>
               )}
 
-              {!loading && !error && movies.length === 0 && (
-                <div className="text-center py-5 rounded-3" style={{ background: "#14141e" }}>
-                  <h4 className="fw-bold">No movies found</h4>
-                  <p className="text-secondary">Try adjusting your search query or filters.</p>
+              {!loading && !error && filteredMovies.length === 0 && (
+                <div className="text-center py-5 rounded-4" style={{ background: "#111420", border: "1px solid var(--stitch-border)" }}>
+                  <h4 className="fw-bold text-white">No matching titles found</h4>
+                  <p className="text-secondary">Try broadening your search query or reset active filters.</p>
                   <button
-                    className="btn btn-outline-secondary btn-sm mt-2"
+                    className="stitch-btn-pill stitch-btn-pill-ghost btn-sm mt-2"
                     onClick={() => {
                       setSearchTerm("");
                       setSelectedGenre("All");
                       setSelectedRating("All");
+                      setSelectedFormat("ALL FORMATS");
                     }}
                   >
-                    Reset Filters
+                    Reset All Filters
                   </button>
                 </div>
               )}
 
-              {!loading && !error && movies.length > 0 && (
+              {/* Movie Grid */}
+              {!loading && !error && filteredMovies.length > 0 && (
                 <div className="row g-4">
-                  {movies.map((movie) => (
-                    <div key={movie._id} className="col-12 col-sm-6 col-md-4 col-lg-3">
-                      <div className="movie-card">
-                        <div className="poster-wrapper">
-                          {movie.posterUrl ? (
-                            <img src={movie.posterUrl} alt={movie.title} className="poster-img" />
-                          ) : (
-                            <div className="poster-placeholder">
-                              <span className="fs-1">ðŸŽ¬</span>
-                              <span className="small mt-2">{movie.language || "Cinema"}</span>
-                            </div>
-                          )}
-                          {movie.rating && <span className="rating-badge">{movie.rating}</span>}
-                        </div>
+                  {filteredMovies.map((movie, index) => {
+                    const formatList = ["IMAX", "DOLBY", "REALD 3D", "LIVE CRITICS"];
+                    const formatLabel = formatList[index % formatList.length];
+                    const defaultPrices = ["$13.50", "$15.00", "$12.50", "$14.00"];
+                    const displayPrice = defaultPrices[index % defaultPrices.length];
+                    const audioTags = ["Dolby Atmos", "Dolby Vision", "Spatial Audio", "Haptic Immersive"];
+                    const audioLabel = audioTags[index % audioTags.length];
 
-                        <div className="p-3 d-flex flex-column flex-grow-1 justify-content-between">
-                          <div>
-                            <h5 className="fw-bold text-white text-truncate mb-1" title={movie.title}>
-                              {movie.title}
-                            </h5>
-                            <div className="text-secondary small mb-2">
-                              <span>{movie.duration} min</span>
-                              {movie.language && <span> Â· {movie.language}</span>}
-                            </div>
+                    return (
+                      <div key={movie._id} className="col-12 col-sm-6 col-md-4 col-lg-3">
+                        <div className="movie-card">
+                          <div className="poster-wrapper">
+                            {movie.posterUrl ? (
+                              <img src={movie.posterUrl} alt={movie.title} className="poster-img" />
+                            ) : (
+                              <ProceduralPoster
+                                title={movie.title}
+                                genre={movie.genres?.[0] || "Cinema"}
+                                format={formatLabel}
+                                index={index}
+                              />
+                            )}
 
-                            <div className="mb-3">
-                              {(movie.genres || []).map((genre) => (
-                                <span key={genre} className="genre-badge">
-                                  {genre}
-                                </span>
-                              ))}
-                            </div>
+                            {/* Top Left Badge */}
+                            <span className="card-format-badge">{formatLabel}</span>
+
+                            {/* Top Right Rating */}
+                            <span className="rating-badge">★ {movie.rating === "R" ? "4.7" : "4.8"}</span>
                           </div>
 
-                          <button
-                            className="btn btn-danger btn-sm w-100 fw-semibold mt-auto"
-                            onClick={() => openMovieDetails(movie)}
-                          >
-                            View Showtimes
-                          </button>
+                          <div className="card-body-content">
+                            <div>
+                              <div className="movie-card-genres">
+                                {movie.genres?.join(" / ") || "Theatrical Presentation"} · {movie.duration}m
+                              </div>
+
+                              <h5 className="movie-card-title text-truncate" title={movie.title}>
+                                {movie.title}
+                              </h5>
+
+                              <div className="movie-card-meta-row">
+                                <span className="card-tech-tag">{audioLabel}</span>
+                                <span className="card-price-tag">From {displayPrice}</span>
+                              </div>
+                            </div>
+
+                            <button
+                              className="btn-card-action"
+                              onClick={() => openMovieDetails(movie)}
+                            >
+                              View Showtimes
+                            </button>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </section>
+
+            {/* COMING SOON & PRESALES SECTION */}
+            <section className="container mb-5">
+              <div className="d-flex justify-content-between align-items-end mb-3 flex-wrap gap-2">
+                <div>
+                  <div className="stitch-section-tag">
+                    <span>●</span>
+                    <span>ADVANCE ACCESS PASS</span>
+                  </div>
+                  <h3 className="stitch-section-title fs-3">COMING SOON & PRESALES</h3>
+                </div>
+                <button
+                  className="btn btn-link p-0 text-decoration-none"
+                  style={{ color: "var(--stitch-orange)", fontWeight: 700, fontSize: "0.84rem" }}
+                  onClick={() => showToast("Opening upcoming premiere release calendar...")}
+                >
+                  View Premiere Calendar →
+                </button>
+              </div>
+
+              <div className="row g-4">
+                {/* Presale Card 1 */}
+                <div className="col-12 col-md-6">
+                  <div className="stitch-presale-card">
+                    <div className="presale-thumb d-flex align-items-center justify-content-center" style={{ background: "radial-gradient(circle, #2d1844 0%, #0d0f17 100%)" }}>
+                      <span style={{ fontSize: "1.8rem" }}>🪐</span>
+                    </div>
+                    <div className="flex-grow-1">
+                      <div className="presale-badge-row">
+                        <span className="presale-tag">PRESALE</span>
+                        <span className="presale-date">Premiere Nov 04</span>
+                      </div>
+                      <h4 className="presale-title">Sub-Orbital 2089</h4>
+                      <div className="presale-subtitle">dir. Elena Vane · NEO Wave Films</div>
+                      <div className="presale-status-row">
+                        <span>⏱ Tickets on sale in 08h</span>
+                      </div>
+                    </div>
+                    <div>
+                      <button
+                        className="btn-presale-action"
+                        onClick={() => showToast("Reminder registered for Sub-Orbital 2089 presale!")}
+                      >
+                        🔔 Notify Me
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Presale Card 2 */}
+                <div className="col-12 col-md-6">
+                  <div className="stitch-presale-card">
+                    <div className="presale-thumb d-flex align-items-center justify-content-center" style={{ background: "radial-gradient(circle, #3d2410 0%, #0e0d10 100%)" }}>
+                      <span style={{ fontSize: "1.8rem" }}>🎻</span>
+                    </div>
+                    <div className="flex-grow-1">
+                      <div className="presale-badge-row">
+                        <span className="presale-tag" style={{ background: "rgba(6,182,212,0.15)", color: "#06b6d4" }}>
+                          EXCLUSIVE
+                        </span>
+                        <span className="presale-date">Premiere Nov 18</span>
+                      </div>
+                      <h4 className="presale-title">The Grand Requiem</h4>
+                      <div className="presale-subtitle">Acoustic Symphony Hall · 4K HDR</div>
+                      <div className="presale-status-row" style={{ color: "#34d399" }}>
+                        <span>★ Advance VIP access list</span>
+                      </div>
+                    </div>
+                    <div>
+                      <button
+                        className="btn-presale-action"
+                        onClick={() => showToast("VIP Pass requested! Details sent to your account.")}
+                      >
+                        🎟 Join Pass
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            {/* MEMBERSHIP VALUE PROPOSITION BANNER */}
+            <section className="container mb-5">
+              <div className="stitch-membership-banner">
+                <div className="row align-items-center g-4">
+                  <div className="col-12 col-lg-8">
+                    <div className="membership-eyebrow">
+                      <span>●</span> IMOVIES PREMIERE PASS
+                    </div>
+                    <h3 className="membership-headline">
+                      ZERO BOOKING FEES. 10-MINUTE CART SEAT HOLDS.
+                    </h3>
+                    <p className="membership-body">
+                      Elevate your cinematic ritual. Unlock invitation-only midnight screenings, free recliner upgrades at select auditoriums, and gourmet concession credit on every booking.
+                    </p>
+                  </div>
+
+                  <div className="col-12 col-lg-4 text-lg-end">
+                    <div className="d-flex align-items-center justify-content-lg-end flex-wrap gap-2">
+                      <button
+                        className="btn-membership-join"
+                        onClick={() => setMembershipModalOpen(true)}
+                      >
+                        JOIN FOR $12 / MONTH
+                      </button>
+                    </div>
+                    <div className="mt-2">
+                      <button
+                        className="btn btn-link p-0 membership-perks-link"
+                        onClick={() => setMembershipModalOpen(true)}
+                      >
+                        Explore Perks & Rules →
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            {/* 4-COLUMN FOOTER */}
+            <footer className="stitch-footer">
+              <div className="container">
+                <div className="row g-4 mb-4">
+                  {/* Col 1: Brand & Bio */}
+                  <div className="col-12 col-md-6 col-lg-3">
+                    <div className="d-flex align-items-center gap-2 mb-3">
+                      <svg width="22" height="22" viewBox="0 0 24 24" fill="var(--stitch-orange)">
+                        <path d="M18 4l2 4h-3l-2-4h-2l2 4h-3l-2-4H8l2 4H7L5 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4h-4z" />
+                      </svg>
+                      <strong className="fs-5 text-white tracking-wider">IMOVIES</strong>
+                    </div>
+                    <p className="small text-secondary" style={{ lineHeight: "1.6" }}>
+                      The premier digital cinema destination. Immerse yourself in ultimate projection fidelity, precision soundscapes, and reserved luxury seating.
+                    </p>
+                  </div>
+
+                  {/* Col 2: Cinemas & Screens */}
+                  <div className="col-6 col-md-6 col-lg-3">
+                    <div className="footer-col-title">Cinemas & Screens</div>
+                    <ul className="footer-link-list">
+                      <li><a href="#cinemas" onClick={(e) => { e.preventDefault(); setCinemasModalOpen(true); }}>Metropolis IMAX Hub</a></li>
+                      <li><a href="#cinemas" onClick={(e) => { e.preventDefault(); setCinemasModalOpen(true); }}>Grand Pavilion Dolby Cinema</a></li>
+                      <li><a href="#cinemas" onClick={(e) => { e.preventDefault(); setCinemasModalOpen(true); }}>Epic Rooftop Cinema</a></li>
+                      <li><a href="#cinemas" onClick={(e) => { e.preventDefault(); setCinemasModalOpen(true); }}>Starlight 70mm Screenhouse</a></li>
+                    </ul>
+                  </div>
+
+                  {/* Col 3: Experience & Terms */}
+                  <div className="col-6 col-md-6 col-lg-3">
+                    <div className="footer-col-title">Experience & Terms</div>
+                    <ul className="footer-link-list">
+                      <li><a href="#terms" onClick={(e) => { e.preventDefault(); showToast("Reservation Terms: 5-minute seat lock with automatic expiry."); }}>Ticket Reservation Terms</a></li>
+                      <li><a href="#guidelines" onClick={(e) => { e.preventDefault(); showToast("Digital Pass: Present QR code at auditorium entrance."); }}>Digital Pass Guidelines</a></li>
+                      <li><a href="#privacy" onClick={(e) => { e.preventDefault(); showToast("Privacy: No external tracking cookies stored."); }}>Privacy & Policy</a></li>
+                      <li><a href="#a11y" onClick={(e) => { e.preventDefault(); showToast("Accessibility: Wheelchair and hearing assistance available."); }}>Accessibility Services</a></li>
+                    </ul>
+                  </div>
+
+                  {/* Col 4: Architecture & Tech */}
+                  <div className="col-12 col-md-6 col-lg-3">
+                    <div className="footer-col-title">Architecture & Tech</div>
+                    <div>
+                      <div className="live-sync-pill">
+                        <span className="live-sync-dot" />
+                        <span>Live Sync Operational</span>
+                      </div>
+                      <div className="small text-secondary mb-2">Fullstack Simulation Stack:</div>
+                      <div className="footer-tech-stack">
+                        <span className="tech-tag-badge">React 19</span>
+                        <span className="tech-tag-badge">Vite</span>
+                        <span className="tech-tag-badge">Express</span>
+                        <span className="tech-tag-badge">MongoDB</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Footer Bottom Bar */}
+                <div className="footer-bottom-bar">
+                  <div className="d-flex align-items-center gap-2">
+                    <span style={{ color: "var(--stitch-orange)" }}>⚡</span>
+                    <span>Simulation Mode Active — Educational showcase and demo sandbox environment.</span>
+                  </div>
+                  <div>© 2026 IMovies Cinema Experiences. All rights reserved.</div>
+                </div>
+              </div>
+            </footer>
           </>
         )
       )}
@@ -1971,7 +2561,7 @@ function App() {
             <div className="d-flex justify-content-between align-items-center border-bottom border-secondary pb-3 mb-3">
               <h4 className="fw-bold text-white mb-0">{editingMovie ? "Edit Movie" : "Add New Movie"}</h4>
               <button className="btn btn-sm btn-outline-secondary text-white" onClick={() => setMovieModalOpen(false)}>
-                âœ•
+                ✕
               </button>
             </div>
 
@@ -2003,18 +2593,9 @@ function App() {
                     ))}
                   </select>
                 </div>
-                <div className="col-12">
-                  <label className="form-label small text-secondary">Description *</label>
-                  <textarea
-                    className="form-control custom-input"
-                    rows="3"
-                    value={movieForm.description}
-                    required
-                    onChange={(e) => setMovieForm({ ...movieForm, description: e.target.value })}
-                  />
-                </div>
-                <div className="col-6 col-md-4">
-                  <label className="form-label small text-secondary">Duration (mins) *</label>
+
+                <div className="col-12 col-md-4">
+                  <label className="form-label small text-secondary">Duration (minutes) *</label>
                   <input
                     type="number"
                     min="1"
@@ -2024,7 +2605,7 @@ function App() {
                     onChange={(e) => setMovieForm({ ...movieForm, duration: e.target.value })}
                   />
                 </div>
-                <div className="col-6 col-md-4">
+                <div className="col-12 col-md-4">
                   <label className="form-label small text-secondary">Language *</label>
                   <input
                     type="text"
@@ -2035,34 +2616,44 @@ function App() {
                   />
                 </div>
                 <div className="col-12 col-md-4">
-                  <label className="form-label small text-secondary">Release Date *</label>
+                  <label className="form-label small text-secondary">Release Date</label>
                   <input
                     type="date"
                     className="form-control custom-input"
                     value={movieForm.releaseDate}
-                    required
                     onChange={(e) => setMovieForm({ ...movieForm, releaseDate: e.target.value })}
                   />
                 </div>
+
                 <div className="col-12">
-                  <label className="form-label small text-secondary">Genres (comma separated) *</label>
+                  <label className="form-label small text-secondary">Genres (comma separated)</label>
                   <input
                     type="text"
                     className="form-control custom-input"
                     value={movieForm.genres}
-                    required
-                    placeholder="Action, Sci-Fi, Thriller"
+                    placeholder="e.g. Action, Sci-Fi, Thriller"
                     onChange={(e) => setMovieForm({ ...movieForm, genres: e.target.value })}
                   />
                 </div>
+
                 <div className="col-12">
-                  <label className="form-label small text-secondary">Poster Image URL (optional)</label>
+                  <label className="form-label small text-secondary">Poster URL (Optional)</label>
                   <input
                     type="url"
                     className="form-control custom-input"
                     value={movieForm.posterUrl}
-                    placeholder="https://..."
+                    placeholder="https://example.com/poster.jpg"
                     onChange={(e) => setMovieForm({ ...movieForm, posterUrl: e.target.value })}
+                  />
+                </div>
+
+                <div className="col-12">
+                  <label className="form-label small text-secondary">Synopsis Description</label>
+                  <textarea
+                    rows={3}
+                    className="form-control custom-input"
+                    value={movieForm.description}
+                    onChange={(e) => setMovieForm({ ...movieForm, description: e.target.value })}
                   />
                 </div>
               </div>
@@ -2071,8 +2662,8 @@ function App() {
                 <button type="button" className="btn btn-outline-secondary" onClick={() => setMovieModalOpen(false)}>
                   Cancel
                 </button>
-                <button type="submit" className="btn btn-danger px-4" disabled={movieFormLoading}>
-                  {movieFormLoading ? "Saving..." : editingMovie ? "Update Movie" : "Create Movie"}
+                <button type="submit" className="stitch-btn-pill stitch-btn-pill-orange px-4" disabled={movieFormLoading}>
+                  {movieFormLoading ? "Saving..." : editingMovie ? "Save Changes" : "Create Movie"}
                 </button>
               </div>
             </form>
@@ -2085,61 +2676,64 @@ function App() {
       {/* --------------------------------------------------------------------- */}
       {theatreModalOpen && (
         <div className="modal-backdrop-custom" onClick={() => setTheatreModalOpen(false)}>
-          <div className="modal-dialog-custom p-4" style={{ maxWidth: "520px" }} onClick={(e) => e.stopPropagation()}>
+          <div className="modal-dialog-custom p-4" onClick={(e) => e.stopPropagation()}>
             <div className="d-flex justify-content-between align-items-center border-bottom border-secondary pb-3 mb-3">
-              <h5 className="fw-bold text-white mb-0">{editingTheatre ? "Edit Theatre" : "Add Cinema Theatre"}</h5>
+              <h4 className="fw-bold text-white mb-0">{editingTheatre ? "Edit Theatre" : "Add New Theatre"}</h4>
               <button className="btn btn-sm btn-outline-secondary text-white" onClick={() => setTheatreModalOpen(false)}>
-                âœ•
+                ✕
               </button>
             </div>
 
             {theatreFormError && <div className="alert alert-danger small py-2">{theatreFormError}</div>}
 
             <form onSubmit={handleSaveTheatre}>
-              <div className="mb-3">
-                <label className="form-label small text-secondary">Theatre Venue Name *</label>
-                <input
-                  type="text"
-                  className="form-control custom-input"
-                  value={theatreForm.name}
-                  required
-                  onChange={(e) => setTheatreForm({ ...theatreForm, name: e.target.value })}
-                />
+              <div className="row g-3">
+                <div className="col-12 col-md-6">
+                  <label className="form-label small text-secondary">Theatre Name *</label>
+                  <input
+                    type="text"
+                    className="form-control custom-input"
+                    value={theatreForm.name}
+                    required
+                    onChange={(e) => setTheatreForm({ ...theatreForm, name: e.target.value })}
+                  />
+                </div>
+                <div className="col-12 col-md-6">
+                  <label className="form-label small text-secondary">City *</label>
+                  <input
+                    type="text"
+                    className="form-control custom-input"
+                    value={theatreForm.city}
+                    required
+                    onChange={(e) => setTheatreForm({ ...theatreForm, city: e.target.value })}
+                  />
+                </div>
+                <div className="col-12">
+                  <label className="form-label small text-secondary">Physical Address *</label>
+                  <input
+                    type="text"
+                    className="form-control custom-input"
+                    value={theatreForm.address}
+                    required
+                    onChange={(e) => setTheatreForm({ ...theatreForm, address: e.target.value })}
+                  />
+                </div>
+                <div className="col-12 col-md-6">
+                  <label className="form-label small text-secondary">Phone Contact</label>
+                  <input
+                    type="text"
+                    className="form-control custom-input"
+                    value={theatreForm.phone}
+                    onChange={(e) => setTheatreForm({ ...theatreForm, phone: e.target.value })}
+                  />
+                </div>
               </div>
-              <div className="mb-3">
-                <label className="form-label small text-secondary">City *</label>
-                <input
-                  type="text"
-                  className="form-control custom-input"
-                  value={theatreForm.city}
-                  required
-                  onChange={(e) => setTheatreForm({ ...theatreForm, city: e.target.value })}
-                />
-              </div>
-              <div className="mb-3">
-                <label className="form-label small text-secondary">Address *</label>
-                <input
-                  type="text"
-                  className="form-control custom-input"
-                  value={theatreForm.address}
-                  required
-                  onChange={(e) => setTheatreForm({ ...theatreForm, address: e.target.value })}
-                />
-              </div>
-              <div className="mb-4">
-                <label className="form-label small text-secondary">Phone Number</label>
-                <input
-                  type="text"
-                  className="form-control custom-input"
-                  value={theatreForm.phone}
-                  onChange={(e) => setTheatreForm({ ...theatreForm, phone: e.target.value })}
-                />
-              </div>
-              <div className="d-flex justify-content-end gap-2">
+
+              <div className="d-flex justify-content-end gap-2 mt-4">
                 <button type="button" className="btn btn-outline-secondary" onClick={() => setTheatreModalOpen(false)}>
                   Cancel
                 </button>
-                <button type="submit" className="btn btn-danger px-4">
+                <button type="submit" className="stitch-btn-pill stitch-btn-pill-orange px-4">
                   {editingTheatre ? "Save Changes" : "Create Theatre"}
                 </button>
               </div>
@@ -2149,15 +2743,15 @@ function App() {
       )}
 
       {/* --------------------------------------------------------------------- */}
-      {/* MODAL: ADD SCREEN AUDITORIUM (ADMIN)                                  */}
+      {/* MODAL: ADD SCREEN (ADMIN)                                             */}
       {/* --------------------------------------------------------------------- */}
-      {screenModalOpen && selectedTheatreForScreens && (
+      {screenModalOpen && (
         <div className="modal-backdrop-custom" onClick={() => setScreenModalOpen(false)}>
-          <div className="modal-dialog-custom p-4" style={{ maxWidth: "460px" }} onClick={(e) => e.stopPropagation()}>
+          <div className="modal-dialog-custom p-4" style={{ maxWidth: "480px" }} onClick={(e) => e.stopPropagation()}>
             <div className="d-flex justify-content-between align-items-center border-bottom border-secondary pb-3 mb-3">
-              <h5 className="fw-bold text-white mb-0">Add Screen to {selectedTheatreForScreens.name}</h5>
+              <h5 className="fw-bold text-white mb-0">Add Screen to {selectedTheatreForScreens?.name}</h5>
               <button className="btn btn-sm btn-outline-secondary text-white" onClick={() => setScreenModalOpen(false)}>
-                âœ•
+                ✕
               </button>
             </div>
 
@@ -2172,17 +2766,12 @@ function App() {
                   className="form-control custom-input"
                   value={screenForm.screenNumber}
                   required
-                  onChange={(e) =>
-                    setScreenForm({
-                      ...screenForm,
-                      screenNumber: e.target.value,
-                      name: `Screen ${e.target.value}`,
-                    })
-                  }
+                  onChange={(e) => setScreenForm({ ...screenForm, screenNumber: e.target.value })}
                 />
               </div>
+
               <div className="mb-3">
-                <label className="form-label small text-secondary">Screen Name</label>
+                <label className="form-label small text-secondary">Screen Name *</label>
                 <input
                   type="text"
                   className="form-control custom-input"
@@ -2191,8 +2780,9 @@ function App() {
                   onChange={(e) => setScreenForm({ ...screenForm, name: e.target.value })}
                 />
               </div>
+
               <div className="mb-3">
-                <label className="form-label small text-secondary">Format Type *</label>
+                <label className="form-label small text-secondary">Screen Type *</label>
                 <select
                   className="form-select custom-select"
                   value={screenForm.screenType}
@@ -2205,11 +2795,12 @@ function App() {
                   ))}
                 </select>
               </div>
-              <div className="mb-4">
+
+              <div className="mb-3">
                 <label className="form-label small text-secondary">Seating Capacity *</label>
                 <input
                   type="number"
-                  min="5"
+                  min="10"
                   max="500"
                   className="form-control custom-input"
                   value={screenForm.seatingCapacity}
@@ -2217,11 +2808,12 @@ function App() {
                   onChange={(e) => setScreenForm({ ...screenForm, seatingCapacity: e.target.value })}
                 />
               </div>
-              <div className="d-flex justify-content-end gap-2">
+
+              <div className="d-flex justify-content-end gap-2 mt-4">
                 <button type="button" className="btn btn-outline-secondary" onClick={() => setScreenModalOpen(false)}>
                   Cancel
                 </button>
-                <button type="submit" className="btn btn-danger px-4">
+                <button type="submit" className="stitch-btn-pill stitch-btn-pill-orange px-4">
                   Add Screen
                 </button>
               </div>
@@ -2231,23 +2823,19 @@ function App() {
       )}
 
       {/* --------------------------------------------------------------------- */}
-      {/* MODAL: SCHEDULE SHOWTIME (ADMIN)                                      */}
+      {/* MODAL: ADD SHOWTIME (ADMIN)                                           */}
       {/* --------------------------------------------------------------------- */}
       {showModalOpen && (
         <div className="modal-backdrop-custom" onClick={() => setShowModalOpen(false)}>
           <div className="modal-dialog-custom p-4" onClick={(e) => e.stopPropagation()}>
             <div className="d-flex justify-content-between align-items-center border-bottom border-secondary pb-3 mb-3">
-              <h4 className="fw-bold text-white mb-0">Schedule New Showtime</h4>
+              <h4 className="fw-bold text-white mb-0">Schedule Theatrical Screening</h4>
               <button className="btn btn-sm btn-outline-secondary text-white" onClick={() => setShowModalOpen(false)}>
-                âœ•
+                ✕
               </button>
             </div>
 
-            {showFormError && (
-              <div className="alert alert-danger small py-2">
-                <strong>Schedule Conflict / Error:</strong> {showFormError}
-              </div>
-            )}
+            {showFormError && <div className="alert alert-danger small py-2">{showFormError}</div>}
 
             <form onSubmit={handleSaveShow}>
               <div className="row g-3">
@@ -2268,12 +2856,12 @@ function App() {
                 </div>
 
                 <div className="col-12 col-md-6">
-                  <label className="form-label small text-secondary">Select Theatre Venue *</label>
+                  <label className="form-label small text-secondary">Select Venue *</label>
                   <select
                     className="form-select custom-select"
                     value={showForm.theatreId}
                     required
-                    onChange={(e) => handleTheatreChangeForShow(e.target.value)}
+                    onChange={(e) => handleShowTheatreChange(e.target.value)}
                   >
                     {adminTheatres.map((t) => (
                       <option key={t._id} value={t._id}>
@@ -2283,8 +2871,8 @@ function App() {
                   </select>
                 </div>
 
-                <div className="col-12">
-                  <label className="form-label small text-secondary">Select Screen Auditorium *</label>
+                <div className="col-12 col-md-6">
+                  <label className="form-label small text-secondary">Select Auditorium *</label>
                   <select
                     className="form-select custom-select"
                     value={showForm.screenId}
@@ -2292,11 +2880,11 @@ function App() {
                     onChange={(e) => setShowForm({ ...showForm, screenId: e.target.value })}
                   >
                     {availableScreensForShow.length === 0 ? (
-                      <option value="">No screens available for this venue</option>
+                      <option value="">No screens in selected theatre</option>
                     ) : (
                       availableScreensForShow.map((s) => (
                         <option key={s._id} value={s._id}>
-                          {s.name} Â· {s.screenType} ({s.seatingCapacity} seats)
+                          {s.name} ({s.screenType} - {s.seatingCapacity} seats)
                         </option>
                       ))
                     )}
@@ -2304,24 +2892,13 @@ function App() {
                 </div>
 
                 <div className="col-12 col-md-6">
-                  <label className="form-label small text-secondary">Start Time *</label>
+                  <label className="form-label small text-secondary">Screening Start Time *</label>
                   <input
                     type="datetime-local"
                     className="form-control custom-input"
                     value={showForm.startTime}
                     required
                     onChange={(e) => setShowForm({ ...showForm, startTime: e.target.value })}
-                  />
-                </div>
-
-                <div className="col-12 col-md-6">
-                  <label className="form-label small text-secondary">End Time *</label>
-                  <input
-                    type="datetime-local"
-                    className="form-control custom-input"
-                    value={showForm.endTime}
-                    required
-                    onChange={(e) => setShowForm({ ...showForm, endTime: e.target.value })}
                   />
                 </div>
 
@@ -2364,7 +2941,7 @@ function App() {
                 <button type="button" className="btn btn-outline-secondary" onClick={() => setShowModalOpen(false)}>
                   Cancel
                 </button>
-                <button type="submit" className="btn btn-danger px-4" disabled={showFormLoading}>
+                <button type="submit" className="stitch-btn-pill stitch-btn-pill-orange px-4" disabled={showFormLoading}>
                   {showFormLoading ? "Verifying..." : "Schedule Showtime"}
                 </button>
               </div>
@@ -2384,18 +2961,18 @@ function App() {
                 <h3 className="fw-bold text-white mb-1">{selectedMovie.title}</h3>
                 <div className="text-secondary small">
                   <span>{selectedMovie.duration} mins</span>
-                  <span> Â· {selectedMovie.language}</span>
-                  {selectedMovie.rating && <span> Â· Rating: {selectedMovie.rating}</span>}
+                  <span> · {selectedMovie.language}</span>
+                  {selectedMovie.rating && <span> · Rating: {selectedMovie.rating}</span>}
                 </div>
               </div>
               <button className="btn btn-sm btn-outline-secondary text-white" onClick={closeDetails}>
-                âœ•
+                ✕
               </button>
             </div>
 
             {detailsLoading ? (
               <div className="text-center py-4">
-                <div className="spinner-border text-danger spinner-border-sm" role="status" />
+                <div className="spinner-border spinner-border-sm text-danger" role="status" />
                 <p className="text-secondary small mt-2">Loading showtimes...</p>
               </div>
             ) : detailsError ? (
@@ -2403,7 +2980,7 @@ function App() {
             ) : (
               <div>
                 <p className="text-light" style={{ lineHeight: "1.6" }}>
-                  {movieDetails?.description || selectedMovie.description}
+                  {movieDetails?.description || selectedMovie.description || "Immerse yourself in this acclaimed theatrical presentation in premium cinema audio and laser projection."}
                 </p>
 
                 <h5 className="fw-bold text-white border-bottom border-secondary pb-2 mb-3 mt-4">
@@ -2438,14 +3015,14 @@ function App() {
                               <strong className="text-white">{show.theatre?.name}</strong>
                               <span className="text-secondary small ms-2">({show.theatre?.city})</span>
                               <div className="text-secondary small">
-                                {show.screen?.name || `Screen ${show.screen?.screenNumber}`} Â·{" "}
+                                {show.screen?.name || `Screen ${show.screen?.screenNumber}`} ·{" "}
                                 {show.screen?.screenType || "2D"}
                               </div>
                             </div>
 
                             <div className="text-end">
                               <span className="badge bg-danger text-white mb-1 d-block">
-                                {formattedDate} Â· {formattedTime}
+                                {formattedDate} · {formattedTime}
                               </span>
                               <span className="text-secondary small">{availableCount} seats left</span>
                             </div>
@@ -2460,8 +3037,8 @@ function App() {
                               ))}
                             </div>
 
-                            <button className="btn btn-sm btn-danger fw-semibold px-3" onClick={() => startSeatSelection(show._id)}>
-                              Choose Seats â†’
+                            <button className="stitch-btn-pill stitch-btn-pill-orange btn-sm px-3" onClick={() => startSeatSelection(show._id)}>
+                              Choose Seats →
                             </button>
                           </div>
                         </div>
@@ -2487,6 +3064,11 @@ function App() {
                 <div className="text-secondary small">Confirm tickets before reserving</div>
               </div>
 
+              <button className="btn btn-sm btn-outline-secondary text-white" onClick={() => setReviewModalOpen(false)}>
+                ✕
+              </button>
+            </div>
+
             {activeHold && (
               <div className="alert alert-warning py-2 px-3 small d-flex align-items-center justify-content-between mt-3 mb-3">
                 <div>
@@ -2498,59 +3080,52 @@ function App() {
                 </span>
               </div>
             )}
-              <button className="btn btn-sm btn-outline-secondary text-white" onClick={() => setReviewModalOpen(false)}>
-                âœ•
-              </button>
-            </div>
 
-            {bookingError && (
-              <div className="alert alert-danger small mb-3">
-                <strong>Booking Conflict:</strong> {bookingError}
-              </div>
-            )}
+            {bookingError && <div className="alert alert-danger small py-2">{bookingError}</div>}
 
-            <div className="p-3 rounded-3 mb-3" style={{ background: "#1c1c2b" }}>
+            <div className="p-3 rounded mb-3" style={{ background: "#181c2b" }}>
               <h5 className="fw-bold text-white mb-1">{activeShow.movie?.title}</h5>
-              <div className="text-secondary small mb-2">
-                {activeShow.theatre?.name} Â· {activeShow.screen?.name || `Screen ${activeShow.screen?.screenNumber}`} ({activeShow.screen?.screenType})
+              <div className="text-secondary small">
+                {activeShow.theatre?.name} · {activeShow.screen?.name} ({activeShow.screen?.screenType})
               </div>
-              <div className="text-light small">
-                ðŸ“… {new Date(activeShow.startTime).toLocaleString([], { dateStyle: "full", timeStyle: "short" })}
+              <div className="text-secondary small mt-1">
+                {new Date(activeShow.startTime).toLocaleString([], { dateStyle: "medium", timeStyle: "short" })}
               </div>
             </div>
 
-            <h6 className="fw-bold text-white mb-2">Selected Seats ({selectedSeats.length})</h6>
-            <div className="list-group mb-3">
-              {selectedSeatObjects.map((seat) => (
-                <div
-                  key={seat.seatNumber}
-                  className="list-group-item d-flex justify-content-between align-items-center text-light"
-                  style={{ background: "#181824", borderColor: "rgba(255,255,255,0.08)" }}
-                >
-                  <div>
-                    <span className="badge bg-danger me-2">{seat.seatNumber}</span>
-                    <span className="text-capitalize small text-secondary">{seat.tier} Class</span>
+            <div className="mb-3">
+              <h6 className="fw-bold text-white mb-2">Selected Seats ({selectedSeats.length})</h6>
+              <div className="d-flex flex-column gap-1">
+                {selectedSeatObjects.map((s) => (
+                  <div key={s.seatNumber} className="d-flex justify-content-between small text-secondary">
+                    <span>
+                      Seat <strong>{s.seatNumber}</strong> ({s.tier?.toUpperCase()})
+                    </span>
+                    <strong className="text-white">${s.price}</strong>
                   </div>
-                  <strong className="text-white">${seat.price}</strong>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
 
-            <div className="d-flex justify-content-between align-items-center p-3 rounded-2 mb-3 bg-black border border-secondary">
-              <span className="text-secondary fw-semibold">Authoritative Total Price:</span>
-              <span className="fs-3 fw-bold accent">${calculatedTotal}</span>
+            <div className="border-top border-secondary pt-3 mt-3 d-flex justify-content-between align-items-center mb-4">
+              <span className="fs-5 fw-bold text-white">Total Amount</span>
+              <span className="fs-4 fw-bold accent">${calculatedTotal}</span>
             </div>
 
-            <div className="p-3 rounded-2 small text-secondary mb-4" style={{ background: "#101018", border: "1px dashed rgba(255,255,255,0.15)" }}>
-              ðŸ”’ <strong>Simulation Mode Notice:</strong> Tickets will be confirmed with <span className="badge bg-secondary">paymentStatus: unpaid</span>.
+            <div className="alert alert-info small" style={{ background: "#102330", borderColor: "#0e7490", color: "#67e8f9" }}>
+              ℹ <strong>Educational Simulation:</strong> Payment processing is simulated. No actual financial transaction will occur.
             </div>
 
             <div className="d-flex justify-content-end gap-2">
-              <button className="btn btn-outline-secondary" onClick={() => setReviewModalOpen(false)} disabled={bookingLoading}>
-                Cancel
+              <button className="stitch-btn-pill stitch-btn-pill-ghost" onClick={() => setReviewModalOpen(false)}>
+                Change Seats
               </button>
-              <button className="btn btn-danger px-4 fw-bold" onClick={handleConfirmBooking} disabled={bookingLoading}>
-                {bookingLoading ? "Reserving Seats..." : "Confirm & Book Now"}
+              <button
+                className="stitch-btn-pill stitch-btn-pill-orange px-4"
+                disabled={bookingLoading}
+                onClick={handleConfirmBooking}
+              >
+                {bookingLoading ? "Processing Reservation..." : "Confirm & Book Now (Simulated Payment)"}
               </button>
             </div>
           </div>
@@ -2558,47 +3133,40 @@ function App() {
       )}
 
       {/* --------------------------------------------------------------------- */}
-      {/* MODAL: BOOKING CONFIRMATION                                           */}
+      {/* MODAL: CONFIRMED BOOKING (STOREFRONT)                                 */}
       {/* --------------------------------------------------------------------- */}
       {confirmedBooking && (
         <div className="modal-backdrop-custom" onClick={() => setConfirmedBooking(null)}>
-          <div className="modal-dialog-custom p-4 text-center" onClick={(e) => e.stopPropagation()}>
-            <div className="mb-3 fs-1 text-success">âœ“</div>
-            <h3 className="fw-bold text-white mb-1">Booking Confirmed!</h3>
-            <p className="text-secondary small mb-3">Your tickets have been reserved successfully.</p>
+          <div className="modal-dialog-custom p-4 text-center" style={{ maxWidth: "480px" }} onClick={(e) => e.stopPropagation()}>
+            <span className="fs-1 text-success">✓</span>
+            <h4 className="fw-bold text-white mt-2 mb-1">Booking Confirmed!</h4>
+            <p className="text-secondary small mb-3">Your tickets have been reserved and digitally issued.</p>
 
-            <div className="p-3 rounded-3 text-start mb-3" style={{ background: "#1c1c2b" }}>
-              <div className="small text-secondary">Booking Reference:</div>
-              <div className="fs-4 fw-bold accent mb-2">{confirmedBooking.bookingReference}</div>
-
-              <div className="row g-2 small text-light">
-                <div className="col-6">
-                  <span className="text-secondary">Seats:</span> {confirmedBooking.seats?.map((s) => s.seatNumber).join(", ")}
-                </div>
-                <div className="col-6 text-end">
-                  <span className="text-secondary">Total:</span> <strong>${confirmedBooking.totalAmount}</strong>
-                </div>
-                <div className="col-6">
-                  <span className="text-secondary">Status:</span> <span className="badge bg-success">{confirmedBooking.bookingStatus}</span>
-                </div>
-                <div className="col-6 text-end">
-                  <span className="text-secondary">Payment:</span> <span className="badge bg-warning text-dark">{confirmedBooking.paymentStatus}</span>
-                </div>
+            <div className="p-3 rounded text-start mb-3" style={{ background: "#181c2b", border: "1px solid var(--stitch-border)" }}>
+              <div className="d-flex justify-content-between small text-secondary mb-2">
+                <span>Reference:</span>
+                <strong className="accent">{confirmedBooking.bookingReference}</strong>
+              </div>
+              <div className="d-flex justify-content-between small text-secondary mb-2">
+                <span>Status:</span>
+                <span className="badge bg-success">{confirmedBooking.bookingStatus}</span>
+              </div>
+              <div className="d-flex justify-content-between small text-secondary mb-2">
+                <span>Seats:</span>
+                <span className="text-white">{confirmedBooking.seats?.map((s) => s.seatNumber).join(", ")}</span>
+              </div>
+              <div className="d-flex justify-content-between small text-secondary mb-2">
+                <span>Total Paid:</span>
+                <strong className="text-white">${confirmedBooking.totalAmount}</strong>
               </div>
             </div>
 
-            <div className="d-flex justify-content-center gap-2">
-              <button
-                className="btn btn-danger px-4"
-                onClick={() => {
-                  setConfirmedBooking(null);
-                  openMyBookings();
-                }}
-              >
-                View in My Bookings
+            <div className="d-flex gap-2">
+              <button className="stitch-btn-pill stitch-btn-pill-ghost flex-grow-1 justify-content-center" onClick={() => setConfirmedBooking(null)}>
+                Done
               </button>
-              <button className="btn btn-outline-secondary" onClick={() => setConfirmedBooking(null)}>
-                Close
+              <button className="stitch-btn-pill stitch-btn-pill-orange flex-grow-1 justify-content-center" onClick={() => { setConfirmedBooking(null); openMyBookings(); }}>
+                View in My Bookings
               </button>
             </div>
           </div>
@@ -2606,38 +3174,24 @@ function App() {
       )}
 
       {/* --------------------------------------------------------------------- */}
-      {/* MODAL: MY BOOKINGS (CUSTOMER)                                         */}
+      {/* DRAWER / MODAL: MY BOOKINGS                                           */}
       {/* --------------------------------------------------------------------- */}
       {myBookingsOpen && (
         <div className="modal-backdrop-custom" onClick={() => setMyBookingsOpen(false)}>
           <div className="modal-dialog-custom p-4" onClick={(e) => e.stopPropagation()}>
-            <div className="d-flex justify-content-between align-items-center border-bottom border-secondary pb-3 mb-4">
-              <div>
-                <h4 className="fw-bold text-white mb-0">My Bookings</h4>
-                <div className="text-secondary small">Your past and upcoming ticket reservations</div>
-              </div>
+            <div className="d-flex justify-content-between align-items-center border-bottom border-secondary pb-3 mb-3">
+              <h4 className="fw-bold text-white mb-0">My Ticket Bookings</h4>
               <button className="btn btn-sm btn-outline-secondary text-white" onClick={() => setMyBookingsOpen(false)}>
-                âœ•
+                ✕
               </button>
             </div>
 
             {myBookingsLoading ? (
-              <div className="text-center py-4">
-                <div className="spinner-border text-danger spinner-border-sm" role="status" />
-                <p className="text-secondary small mt-2">Loading reservations...</p>
-              </div>
+              <div className="text-center py-5 text-secondary">Loading your booking history...</div>
             ) : myBookings.length === 0 ? (
               <div className="text-center py-5 text-secondary">
-                <p>You have not booked any tickets yet.</p>
-                <button
-                  className="btn btn-outline-danger btn-sm"
-                  onClick={() => {
-                    setMyBookingsOpen(false);
-                    closeSeatSelection();
-                  }}
-                >
-                  Explore Current Movies
-                </button>
+                <span className="fs-1 d-block mb-2">🎟️</span>
+                <p>You haven't made any bookings yet.</p>
               </div>
             ) : (
               <div className="d-flex flex-column gap-3">
@@ -2645,45 +3199,35 @@ function App() {
                   <div key={b._id} className="booking-item-card">
                     <div className="d-flex justify-content-between align-items-start mb-2">
                       <div>
-                        <strong className="text-white fs-5">{b.show?.movie?.title || "Movie Booking"}</strong>
+                        <strong className="accent fs-5">{b.bookingReference}</strong>
+                        <div className="text-white fw-bold mt-1">{b.show?.movie?.title}</div>
                         <div className="text-secondary small">
-                          Ref: <strong className="text-light">{b.bookingReference}</strong>
+                          {b.show?.theatre?.name} · {b.show?.screen?.name}
+                        </div>
+                        <div className="text-secondary small">
+                          {b.show?.startTime ? new Date(b.show.startTime).toLocaleString([], { dateStyle: "medium", timeStyle: "short" }) : "N/A"}
                         </div>
                       </div>
+
                       <div className="text-end">
-                        <span
-                          className={`badge ${
-                            b.bookingStatus === "confirmed"
-                              ? "bg-success"
-                              : b.bookingStatus === "cancelled"
-                              ? "bg-secondary"
-                              : "bg-warning"
-                          } me-1`}
-                        >
+                        <span className={`badge ${b.bookingStatus === "confirmed" ? "bg-success" : "bg-secondary"} mb-1`}>
                           {b.bookingStatus}
                         </span>
-                        <span className="badge bg-dark border border-secondary text-light">{b.paymentStatus}</span>
+                        <div className="fw-bold text-white mt-1">${b.totalAmount}</div>
                       </div>
                     </div>
 
-                    <div className="small text-secondary mb-2">
-                      {b.show?.theatre?.name} ({b.show?.theatre?.city}) Â· {b.show?.screen?.name || `Screen ${b.show?.screen?.screenNumber}`}
-                      <br />
-                      ðŸ“… {b.show?.startTime ? new Date(b.show.startTime).toLocaleString() : "Date TBD"}
-                    </div>
-
-                    <div className="d-flex justify-content-between align-items-center pt-2 border-top border-secondary border-opacity-25 small">
-                      <div>
-                        <span className="text-secondary">Seats:</span>{" "}
+                    <div className="d-flex justify-content-between align-items-center pt-2 border-top border-secondary mt-2">
+                      <div className="small text-secondary">
+                        Seats:{" "}
                         {b.seats?.map((s) => (
                           <span key={s.seatNumber} className="badge bg-danger me-1">
                             {s.seatNumber}
                           </span>
                         ))}
-                        <span className="text-secondary ms-2">Total:</span> <strong className="accent">${b.totalAmount}</strong>
                       </div>
 
-                      {b.bookingStatus !== "cancelled" && (
+                      {b.bookingStatus === "confirmed" && (
                         <button
                           className="btn btn-outline-danger btn-sm"
                           disabled={cancellingId === b._id}
@@ -2702,6 +3246,97 @@ function App() {
       )}
 
       {/* --------------------------------------------------------------------- */}
+      {/* MODAL: CINEMAS EXPLORER                                               */}
+      {/* --------------------------------------------------------------------- */}
+      {cinemasModalOpen && (
+        <div className="modal-backdrop-custom" onClick={() => setCinemasModalOpen(false)}>
+          <div className="modal-dialog-custom p-4" onClick={(e) => e.stopPropagation()}>
+            <div className="d-flex justify-content-between align-items-center border-bottom border-secondary pb-3 mb-3">
+              <div>
+                <h4 className="fw-bold text-white mb-0">Flagship Cinemas & Screenhouses</h4>
+                <div className="text-secondary small">Premium auditorium venues and projection standards</div>
+              </div>
+              <button className="btn btn-sm btn-outline-secondary text-white" onClick={() => setCinemasModalOpen(false)}>
+                ✕
+              </button>
+            </div>
+
+            <div className="row g-3">
+              {adminTheatres.map((t) => (
+                <div key={t._id} className="col-12 col-md-6">
+                  <div className="p-3 rounded-4" style={{ background: "#181c2b", border: "1px solid var(--stitch-border)" }}>
+                    <div className="d-flex align-items-center gap-2 mb-2">
+                      <span className="card-format-badge position-static">IMAX & DOLBY</span>
+                      <strong className="text-white fs-5">{t.name}</strong>
+                    </div>
+                    <div className="text-secondary small mb-1">📍 {t.address}, {t.city}</div>
+                    {t.phone && <div className="text-secondary small">📞 {t.phone}</div>}
+                    <div className="mt-3 pt-2 border-top border-secondary border-opacity-25 d-flex justify-content-between align-items-center">
+                      <span className="text-success small fw-bold">● Active Screenhouse</span>
+                      <button
+                        className="stitch-btn-pill stitch-btn-pill-orange btn-sm"
+                        onClick={() => {
+                          setDiscoveryCinema(t.name);
+                          setCinemasModalOpen(false);
+                          const el = document.getElementById("now-showing");
+                          if (el) el.scrollIntoView({ behavior: "smooth" });
+                        }}
+                      >
+                        Explore Shows →
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* --------------------------------------------------------------------- */}
+      {/* MODAL: PREMIERE PASS MEMBERSHIP                                       */}
+      {/* --------------------------------------------------------------------- */}
+      {membershipModalOpen && (
+        <div className="modal-backdrop-custom" onClick={() => setMembershipModalOpen(false)}>
+          <div className="modal-dialog-custom p-4" style={{ maxWidth: "520px" }} onClick={(e) => e.stopPropagation()}>
+            <div className="d-flex justify-content-between align-items-center border-bottom border-secondary pb-3 mb-3">
+              <h4 className="fw-bold text-white mb-0">IMovies Premiere Pass</h4>
+              <button className="btn btn-sm btn-outline-secondary text-white" onClick={() => setMembershipModalOpen(false)}>
+                ✕
+              </button>
+            </div>
+
+            <div className="text-center py-3">
+              <span className="fs-1">🎟️</span>
+              <h3 className="fw-bold text-white mt-2">$12 / Month</h3>
+              <p className="text-secondary small">Full VIP Privileges (Simulated Sandbox Access)</p>
+            </div>
+
+            <ul className="text-secondary small d-flex flex-column gap-2 mb-4">
+              <li>✓ <strong>Zero Convenience Fees:</strong> Free digital reservation on every screening.</li>
+              <li>✓ <strong>Extended 10-Minute Cart Holds:</strong> Double hold duration for high-demand premieres.</li>
+              <li>✓ <strong>VIP Recliner Priority:</strong> Complimentary upgrade to VIP Recliner rows when available.</li>
+              <li>✓ <strong>Invitation Midnight Previews:</strong> Early access to exclusive IMAX 70MM releases.</li>
+            </ul>
+
+            <div className="alert alert-info small" style={{ background: "#102330", borderColor: "#0e7490", color: "#67e8f9" }}>
+              ℹ <strong>Educational Sandbox:</strong> Activating this membership grants instant pass perks in your active session.
+            </div>
+
+            <button
+              className="stitch-btn-pill stitch-btn-pill-orange w-100 justify-content-center py-2"
+              onClick={() => {
+                setMembershipModalOpen(false);
+                showToast("Premiere Pass activated! You now have zero booking fees and priority holds.");
+              }}
+            >
+              Activate Pass Now
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* --------------------------------------------------------------------- */}
       {/* MODAL: QUICK AUTHENTICATION                                           */}
       {/* --------------------------------------------------------------------- */}
       {authModalOpen && (
@@ -2710,7 +3345,7 @@ function App() {
             <div className="d-flex justify-content-between align-items-center border-bottom border-secondary pb-2 mb-3">
               <h5 className="fw-bold text-white mb-0">{authMode === "login" ? "Sign In" : "Register Account"}</h5>
               <button className="btn btn-sm btn-outline-secondary text-white" onClick={() => setAuthModalOpen(false)}>
-                âœ•
+                ✕
               </button>
             </div>
 
@@ -2752,7 +3387,7 @@ function App() {
                 />
               </div>
 
-              <button type="submit" className="btn btn-danger w-100 fw-bold py-2 mb-3">
+              <button type="submit" className="stitch-btn-pill stitch-btn-pill-orange w-100 justify-content-center py-2 mb-3">
                 {authMode === "login" ? "Sign In" : "Create Account"}
               </button>
 
@@ -2762,7 +3397,8 @@ function App() {
                     Need an account?{" "}
                     <button
                       type="button"
-                      className="btn btn-link p-0 text-danger text-decoration-none small"
+                      className="btn btn-link p-0 text-decoration-none small"
+                      style={{ color: "var(--stitch-orange)" }}
                       onClick={() => setAuthMode("register")}
                     >
                       Register here
@@ -2773,7 +3409,8 @@ function App() {
                     Already have an account?{" "}
                     <button
                       type="button"
-                      className="btn btn-link p-0 text-danger text-decoration-none small"
+                      className="btn btn-link p-0 text-decoration-none small"
+                      style={{ color: "var(--stitch-orange)" }}
                       onClick={() => setAuthMode("login")}
                     >
                       Sign In
@@ -2785,12 +3422,6 @@ function App() {
           </div>
         </div>
       )}
-
-      {/* Footer */}
-      <footer className="mt-auto container py-4 text-secondary border-top border-secondary small d-flex justify-content-between align-items-center">
-        <span>IMovies Â· Full-Stack MERN Cinema Management</span>
-        <span className="text-secondary">v1.3.0</span>
-      </footer>
     </div>
   );
 }
