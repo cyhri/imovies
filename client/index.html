@@ -1,16 +1,116 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" class="dark">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#08090d" />
-    <meta name="description" content="IMovies — Discover movies, explore showtimes, and book cinema tickets with real-time seat reservation." />
-    <title>IMovies | Movie Discovery & Real-Time Cinema Ticketing</title>
+    <meta name="theme-color" content="#151216" />
+    <meta name="description" content="IMovies — Architectural Cinema, Archival 70mm, and Real-Time Seat Holds." />
+    <title>IMOVIES | Architectural Cinema & Real-Time Seat Reservation</title>
+    <!-- Google Fonts: Space Grotesk, Inter, Material Symbols Outlined -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <!-- Tailwind CSS with Stitch Crimson Editorial Tokens -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-surface-variant": "#e6bdbc",
+              "surface-dim": "#151216",
+              "error": "#ffb4ab",
+              "on-error-container": "#ffdad6",
+              "secondary-fixed-dim": "#ffb3b5",
+              "on-error": "#690005",
+              "on-tertiary-container": "#ffebee",
+              "surface-container-low": "#1e1b1e",
+              "background": "#151216",
+              "primary-container": "#d80d35",
+              "outline-variant": "#5d3f3f",
+              "surface-variant": "#373438",
+              "on-secondary": "#680018",
+              "on-surface": "#e8e0e6",
+              "inverse-on-surface": "#332f33",
+              "on-primary": "#680013",
+              "on-tertiary-fixed": "#3f0019",
+              "on-secondary-fixed-variant": "#920026",
+              "surface-tint": "#ffb3b2",
+              "secondary": "#ffb3b5",
+              "on-secondary-container": "#fff6f6",
+              "primary-fixed": "#ffdad9",
+              "surface": "#151216",
+              "error-container": "#93000a",
+              "primary": "#ffb3b2",
+              "surface-container-high": "#2c292d",
+              "on-primary-container": "#ffebea",
+              "primary-fixed-dim": "#ffb3b2",
+              "tertiary-fixed": "#ffd9e0",
+              "tertiary-container": "#c23768",
+              "surface-container-highest": "#373438",
+              "secondary-fixed": "#ffdada",
+              "surface-bright": "#3c383c",
+              "surface-container-lowest": "#100d11",
+              "on-tertiary": "#66002d",
+              "on-secondary-fixed": "#40000b",
+              "on-tertiary-fixed-variant": "#8e0542",
+              "inverse-surface": "#e8e0e6",
+              "on-primary-fixed": "#410008",
+              "outline": "#ad8887",
+              "secondary-container": "#e30140",
+              "surface-container": "#221f23",
+              "tertiary": "#ffb1c3",
+              "inverse-primary": "#bf002c",
+              "tertiary-fixed-dim": "#ffb1c3",
+              "on-primary-fixed-variant": "#92001f",
+              "on-background": "#e8e0e6",
+            },
+            borderRadius: {
+              DEFAULT: "0.125rem",
+              lg: "0.25rem",
+              xl: "0.5rem",
+              full: "0.75rem",
+            },
+            spacing: {
+              "space-md": "1rem",
+              margin: "2rem",
+              "gutter-sm": "1rem",
+              "margin-desktop": "4rem",
+              "space-3xl": "6rem",
+              "space-2xl": "4rem",
+              "gutter-lg": "2.5rem",
+              "space-xs": "0.25rem",
+              "space-xl": "2.5rem",
+              gutter: "1.5rem",
+              "space-sm": "0.5rem",
+              "space-lg": "1.5rem",
+              "margin-mobile": "1.25rem",
+            },
+            fontFamily: {
+              "body-lg": ["Inter", "sans-serif"],
+              "display-lg-mobile": ["Space Grotesk", "sans-serif"],
+              "display-xl-mobile": ["Space Grotesk", "sans-serif"],
+              "display-lg": ["Space Grotesk", "sans-serif"],
+              "headline-sm": ["Space Grotesk", "sans-serif"],
+              "display-xl": ["Space Grotesk", "sans-serif"],
+              "headline-md": ["Space Grotesk", "sans-serif"],
+              "body-sm": ["Inter", "sans-serif"],
+              "label-sm": ["Inter", "sans-serif"],
+              "headline-lg": ["Space Grotesk", "sans-serif"],
+              "body-md": ["Inter", "sans-serif"],
+              "label-caps": ["Space Grotesk", "sans-serif"],
+              "label-md": ["Inter", "sans-serif"],
+              "headline-lg-mobile": ["Space Grotesk", "sans-serif"],
+            },
+          },
+        },
+      };
+    </script>
   </head>
-  <body>
+  <body class="bg-surface text-on-surface antialiased selection:bg-primary-container selection:text-white">
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>

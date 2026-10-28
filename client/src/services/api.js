@@ -30,6 +30,7 @@ export async function fetchMovies(params = {}) {
   if (params.page) query.set('page', params.page);
   if (params.limit) query.set('limit', params.limit);
   if (params.q) query.set('q', params.q);
+  if (params.search) query.set('q', params.search);
   if (params.genre) query.set('genre', params.genre);
   if (params.rating) query.set('rating', params.rating);
   if (params.language) query.set('language', params.language);
